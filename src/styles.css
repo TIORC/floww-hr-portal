@@ -59,6 +59,14 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
+  --color-accent-yellow: var(--accent-yellow);
+  --color-form-foreground: var(--form-foreground);
+  --color-form-border: var(--form-border);
+  --color-form-field: var(--form-field);
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Montserrat", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
@@ -95,6 +103,59 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  /* Floww! brand */
+  --brand: oklch(0.32 0.13 258);
+  --brand-deep: oklch(0.24 0.11 261);
+  --accent-yellow: oklch(0.87 0.17 91);
+  --primary: oklch(0.32 0.13 258);
+  --primary-foreground: oklch(0.985 0.005 95);
+  --ring: oklch(0.32 0.13 258);
+  --form-foreground: oklch(0.145 0 0);
+  --form-border: oklch(0.32 0.13 258 / 30%);
+  --form-field: oklch(0.99 0.02 95 / 85%);
+  --gradient-brand: linear-gradient(135deg, var(--brand-deep), var(--brand) 55%, oklch(0.45 0.15 255));
+  --gradient-accent: linear-gradient(90deg, var(--accent-yellow), oklch(0.93 0.13 100));
+  --gradient-form: linear-gradient(
+    150deg,
+    oklch(0.93 0.16 95) 0%,
+    oklch(0.89 0.17 92) 42%,
+    oklch(0.84 0.13 105) 68%,
+    oklch(0.72 0.11 215) 100%
+  );
+  --shadow-form: 0 28px 70px -30px oklch(0.32 0.13 258 / 45%);
+  --shadow-brand: 0 16px 34px -14px oklch(0.32 0.13 258 / 55%);
+}
+
+@utility brand-glow {
+  position: absolute;
+  inset-inline-start: -6rem;
+  top: -4rem;
+  height: 22rem;
+  width: 22rem;
+  border-radius: 9999px;
+  background: var(--gradient-accent);
+  opacity: 0.35;
+  filter: blur(70px);
+}
+
+@utility brand-arc {
+  position: absolute;
+  inset-inline-end: -8rem;
+  bottom: -10rem;
+  height: 26rem;
+  width: 26rem;
+  border-radius: 9999px;
+  border: 2.5rem solid transparent;
+  background: var(--gradient-accent) border-box;
+  mask: linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0);
+  opacity: 0.45;
+}
+
+@utility brand-bang {
+  background: var(--gradient-accent);
+  background-clip: text;
+  color: transparent;
 }
 
 .dark {
@@ -140,5 +201,7 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-weight: 500;
   }
 }
