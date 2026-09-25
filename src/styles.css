@@ -62,6 +62,10 @@
   --color-brand: var(--brand);
   --color-brand-deep: var(--brand-deep);
   --color-accent-yellow: var(--accent-yellow);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-green: var(--accent-green);
+  --color-accent-gold: var(--accent-gold);
   --color-form-foreground: var(--form-foreground);
   --color-form-border: var(--form-border);
   --color-form-field: var(--form-field);
@@ -108,6 +112,10 @@
   --brand: oklch(0.32 0.13 258);
   --brand-deep: oklch(0.24 0.11 261);
   --accent-yellow: oklch(0.87 0.17 91);
+  --accent-soft: oklch(0.98 0.032 95);
+  --accent-orange: oklch(0.68 0.19 50);
+  --accent-green: oklch(0.62 0.15 152);
+  --accent-gold: oklch(0.72 0.16 85);
   --primary: oklch(0.32 0.13 258);
   --primary-foreground: oklch(0.985 0.005 95);
   --ring: oklch(0.32 0.13 258);
@@ -152,6 +160,109 @@
   opacity: 0.45;
 }
 
+@keyframes bubble-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.65);
+    opacity: 0;
+  }
+  15% {
+    opacity: var(--bubble-opacity, 0.35);
+  }
+  72% {
+    opacity: var(--bubble-opacity, 0.35);
+  }
+  100% {
+    transform: translate3d(var(--bubble-drift-x, 5rem), -26rem, 0) scale(1.1);
+    opacity: 0;
+  }
+}
+
+@utility brand-bubbles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+@utility brand-bubble {
+  position: absolute;
+  bottom: -2.5rem;
+  left: var(--bubble-left, 50%);
+  height: var(--bubble-size, 1rem);
+  width: var(--bubble-size, 1rem);
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 34% 30%,
+    oklch(0.74 0.15 250 / 100%) 0%,
+    oklch(0.58 0.2 255 / 95%) 45%,
+    oklch(0.5 0.21 260 / 0%) 76%
+  );
+  box-shadow: inset 0 0 0 1px oklch(0.52 0.19 255 / 70%);
+  animation: bubble-drift var(--bubble-duration, 16s) ease-in-out var(--bubble-delay, 0s) infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes spiral-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@utility brand-spiral {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spiral-spin 15s linear infinite;
+  will-change: transform;
+}
+
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.85rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility brand-message {
+  animation: message-in 800ms ease-out both;
+}
+
+@keyframes wave-float {
+  0%,
+  100% {
+    transform: translateX(0) scaleY(1);
+  }
+  50% {
+    transform: translateX(0.5rem) scaleY(1.05);
+  }
+}
+
+@utility brand-wave {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: wave-float 9s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-bubble {
+    animation: none;
+    opacity: 0;
+  }
+
+  .brand-spiral,
+  .brand-message,
+  .brand-wave {
+    animation: none;
+  }
+}
+
 @utility brand-bang {
   background: var(--gradient-accent);
   background-clip: text;
@@ -191,6 +302,10 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+  --accent-soft: oklch(0.32 0.05 95);
+  --accent-orange: oklch(0.72 0.16 50);
+  --accent-green: oklch(0.68 0.14 152);
+  --accent-gold: oklch(0.76 0.14 85);
 }
 
 @layer base {

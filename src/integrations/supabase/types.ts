@@ -14,10 +14,113 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      setores: {
+        Row: {
+          criado_em: string
+          id: string
+          nome: string
+          sigla: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          nome: string
+          sigla: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          nome?: string
+          sigla?: string
+        }
+        Relationships: []
+      }
+      cargos: {
+        Row: {
+          criado_em: string
+          id: string
+          nome: string
+          setor_id: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          nome: string
+          setor_id: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          nome?: string
+          setor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cargos_setor_id_fkey"
+            columns: ["setor_id"]
+            isOneToOne: false
+            referencedRelation: "setores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      colaboradores: {
+        Row: {
+          cargo_id: string
+          criado_em: string
+          id: string
+          nome: string
+          setor_id: string
+          user_id: string
+        }
+        Insert: {
+          cargo_id: string
+          criado_em?: string
+          id?: string
+          nome: string
+          setor_id: string
+          user_id: string
+        }
+        Update: {
+          cargo_id?: string
+          criado_em?: string
+          id?: string
+          nome?: string
+          setor_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "colaboradores_cargo_id_fkey"
+            columns: ["cargo_id"]
+            isOneToOne: false
+            referencedRelation: "cargos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "colaboradores_setor_id_fkey"
+            columns: ["setor_id"]
+            isOneToOne: false
+            referencedRelation: "setores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      perfil_colaborador: {
+        Row: {
+          cargo: string
+          cargo_id: string
+          id: string
+          nome: string
+          setor: string
+          setor_id: string
+          setor_sigla: string
+          user_id: string
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
