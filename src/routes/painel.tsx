@@ -1,11 +1,34 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { Home } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  CalendarClock,
+  ChevronRight,
+  ClipboardCheck,
+  ClipboardList,
+  BriefcaseBusiness,
+  MessageCircle,
+  X,
+  FileSearch,
+  Home,
+  Megaphone,
+  MessageSquareText,
+  ListChecks,
+  SearchCheck,
+  ShieldAlert,
+  Smile,
+  Sparkles,
+  TrendingUp,
+  UserSearch,
+  UserMinus,
+  UsersRound,
+  Zap,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PerfilFlutuante } from "@/components/perfil-flutuante";
 import { IndicadoresPainel } from "@/components/indicadores-painel";
 import { RankingMoedas } from "@/components/ranking-moedas";
 import { usePerfil } from "@/hooks/use-perfil";
+import { useRegistrarAcesso } from "@/hooks/use-acessos-diarios";
 import { montarSaudacao } from "@/lib/greeting";
 
 const NAV_ITEMS = [{ to: "/painel", label: "Início", icon: Home }] as const;
@@ -19,7 +42,7 @@ export const Route = createFileRoute("/painel")({
 
 function Sidebar() {
   return (
-    <aside className="relative flex min-h-screen flex-col overflow-hidden bg-[image:var(--gradient-brand)] px-6 py-7 lg:min-h-0">
+    <aside className="relative z-30 flex min-h-screen flex-col bg-[image:var(--gradient-brand)] px-6 py-7 lg:sticky lg:top-0 lg:h-screen lg:min-h-0">
       <span className="relative font-display text-2xl font-bold tracking-tight text-white">
         Floww
         <span className="brand-bang">!</span>
@@ -44,6 +67,115 @@ function Sidebar() {
               </Link>
             </li>
           ))}
+          <li className="group relative">
+            <button
+              type="button"
+              aria-haspopup="true"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-white/70 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            >
+              <TrendingUp className="size-4 shrink-0" aria-hidden />
+              <span className="flex-1">Desempenho &amp; Evolução</span>
+              <ChevronRight className="size-4 shrink-0" aria-hidden />
+            </button>
+            <ul className="absolute left-full top-0 z-20 ml-2 hidden w-56 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
+              {[
+                { label: "Minhas Avaliações", icon: ClipboardCheck },
+                { label: "Feedback's", icon: MessageSquareText },
+                { label: "Planos de Desenvolvimento", icon: CalendarClock },
+                { label: "Reuniões 1:1", icon: UsersRound },
+              ].map(({ label, icon: Icon }) => (
+                <li key={label}>
+                  <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
+                    <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                    {label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </li>
+          <li className="group relative">
+            <button
+              type="button"
+              aria-haspopup="true"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-white/70 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            >
+              <Sparkles className="size-4 shrink-0" aria-hidden />
+              <span className="flex-1">Clima e Engajamento</span>
+              <ChevronRight className="size-4 shrink-0" aria-hidden />
+            </button>
+            <ul className="absolute left-full top-0 z-20 ml-2 hidden w-56 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
+              {[
+                { label: "Comunicados", icon: Megaphone },
+                { label: "Gamificação", icon: Sparkles },
+              ].map(({ label, icon: Icon }) => (
+                <li key={label}>
+                  <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
+                    <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                    {label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </li>
+        </ul>
+        <p className="mt-7 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-white/45">
+          Gestão
+        </p>
+        <ul className="mt-3 grid gap-1.5">
+          <li className="group relative">
+            <button
+              type="button"
+              aria-haspopup="true"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-white/70 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            >
+              <FileSearch className="size-4 shrink-0" aria-hidden />
+              <span className="flex-1">Relatórios e Pesquisas</span>
+              <ChevronRight className="size-4 shrink-0" aria-hidden />
+            </button>
+            <ul className="absolute left-full top-0 z-20 ml-2 hidden w-64 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
+              {[
+                { label: "Pesquisa de Satisfação", icon: Smile },
+                { label: "Pesquisa Rápida", icon: Zap },
+                { label: "Super Pesquisa", icon: ClipboardList },
+                { label: "Pesquisa de Engajamento", icon: UsersRound },
+                { label: "Mapeamento de Riscos Psicossociais", icon: ShieldAlert },
+                { label: "Pesquisa de Desligamento", icon: UserMinus },
+                { label: "Planos de Ação", icon: ListChecks },
+              ].map(({ label, icon: Icon }) => (
+                <li key={label}>
+                  <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
+                    <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                    {label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </li>
+          <li className="group relative">
+            <button
+              type="button"
+              aria-haspopup="true"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-white/70 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            >
+              <BriefcaseBusiness className="size-4 shrink-0" aria-hidden />
+              <span className="flex-1">Recrutamento &amp; Seleção</span>
+              <ChevronRight className="size-4 shrink-0" aria-hidden />
+            </button>
+            <ul className="absolute left-full top-0 z-20 ml-2 hidden w-56 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
+              {[
+                { label: "Vagas", icon: BriefcaseBusiness },
+                { label: "Processos Seletivos", icon: UserSearch },
+                { label: "DISC", icon: SearchCheck },
+              ].map(({ label, icon: Icon }) => (
+                <li key={label}>
+                  <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
+                    <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                    {label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </li>
         </ul>
       </nav>
 
@@ -84,6 +216,8 @@ function Saudacao() {
 
 function Painel() {
   const navigate = useNavigate();
+  const [chatAberto, setChatAberto] = useState(false);
+  const { mutate: registrarAcesso } = useRegistrarAcesso();
 
   useEffect(() => {
     let cancelled = false;
@@ -92,12 +226,15 @@ function Painel() {
       if (!cancelled && !data.session) {
         navigate({ to: "/", replace: true });
       }
+      if (!cancelled && data.session) {
+        registrarAcesso();
+      }
     });
 
     return () => {
       cancelled = true;
     };
-  }, [navigate]);
+  }, [navigate, registrarAcesso]);
 
   return (
     <div className="grid min-h-screen bg-background lg:grid-cols-[16rem_1fr]">
@@ -113,6 +250,66 @@ function Painel() {
         <IndicadoresPainel />
         <RankingMoedas />
       </main>
+      <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+        {chatAberto ? (
+          <section
+            aria-label="Chat com a assistente"
+            className="mb-2 flex h-[25rem] w-[min(21rem,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/10"
+          >
+            <header className="flex items-center justify-between bg-[image:var(--gradient-brand)] px-4 py-3 text-white">
+              <div className="flex items-center gap-2.5">
+                <img src="/and.png" alt="" className="size-9 object-contain" />
+                <div>
+                  <p className="text-sm font-semibold">Assistente Floww</p>
+                  <p className="text-xs text-white/75">Se precisar, eu estou aqui, viu?</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                aria-label="Fechar chat"
+                onClick={() => setChatAberto(false)}
+                className="rounded-md p-1.5 transition hover:bg-white/15"
+              >
+                <X className="size-4" aria-hidden />
+              </button>
+            </header>
+            <div className="flex-1 bg-slate-50 p-4">
+              <p className="max-w-[85%] rounded-2xl rounded-tl-sm bg-white px-3.5 py-2.5 text-sm text-slate-700 shadow-sm ring-1 ring-black/5">
+                Olá! Como posso ajudar você hoje?
+              </p>
+            </div>
+            <div className="flex items-center gap-2 border-t border-slate-200 p-3">
+              <input
+                type="text"
+                disabled
+                placeholder="Chat em breve"
+                aria-label="Mensagem para a assistente"
+                className="h-10 min-w-0 flex-1 rounded-full bg-slate-100 px-4 text-sm text-slate-600 outline-none placeholder:text-slate-400"
+              />
+              <span
+                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-300 text-white"
+                aria-hidden
+              >
+                <MessageCircle className="size-4" />
+              </span>
+            </div>
+          </section>
+        ) : (
+          <div className="relative z-10 translate-y-14 max-w-60 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-lg ring-1 ring-black/5">
+            Se precisar, eu estou aqui, viu?
+            <span aria-hidden className="absolute -bottom-1.5 right-7 size-3 rotate-45 bg-white" />
+          </div>
+        )}
+        <button
+          type="button"
+          aria-label={chatAberto ? "Fechar chat" : "Abrir chat com a assistente"}
+          aria-expanded={chatAberto}
+          onClick={() => setChatAberto((aberto) => !aberto)}
+          className="rounded-full transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+        >
+          <img src="/and.png" alt="" className="size-42 object-contain drop-shadow-lg" />
+        </button>
+      </div>
     </div>
   );
 }

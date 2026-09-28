@@ -123,7 +123,14 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      get_acessos_diario_comparativo: {
+        Args: { p_user_id: string };
+        Returns: Json;
+      };
+      registrar_acesso_diario: {
+        Args: { p_colaborador_id: string };
+        Returns: void;
+      };
     }
     Enums: {
       [_ in never]: never

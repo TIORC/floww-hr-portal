@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Award, CodeXml, Flame, LogIn, TrendingUp, type LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useAcessosDiarios } from "@/hooks/use-acessos-diarios";
 
 const CARD =
   "flex h-[230px] w-[280px] shrink-0 flex-col rounded-2xl border border-border bg-card p-5";
@@ -70,6 +71,46 @@ function CardTitulo({
       <Icone className={cn("size-4 shrink-0", cor)} aria-hidden />
       <h3 className="truncate text-sm font-semibold text-muted-foreground">{titulo}</h3>
     </div>
+  );
+}
+
+function CardAcessosDiarios() {
+  const { data, isLoading, isError } = useAcessosDiarios();
+
+  if (isLoading) {
+    return (
+      <article className={CARD}>
+        <CardTitulo icone={LogIn} titulo="Acessos diários" cor="text-brand" />
+        <p className="mt-auto font-display text-4xl font-bold text-foreground">—</p>
+      </article>
+    );
+  }
+
+  if (isError || !data || data.erro) {
+    return (
+      <article className={CARD}>
+        <CardTitulo icone={LogIn} titulo="Acessos diários" cor="text-brand" />
+        <p className="mt-auto font-display text-4xl font-bold text-foreground">0</p>
+        <p className="mt-2 text-sm text-muted-foreground">Dados indisponíveis</p>
+      </article>
+    );
+  }
+
+  const { meus_acessos, comparativo, percentual } = data;
+
+  const comparativoCor =
+    percentual > 0
+      ? "text-accent-green"
+      : percentual < 0
+        ? "text-destructive"
+        : "text-muted-foreground";
+
+  return (
+    <article className={CARD}>
+      <CardTitulo icone={LogIn} titulo="Acessos diários" cor="text-brand" />
+      <p className="mt-auto font-display text-4xl font-bold text-foreground">{meus_acessos}</p>
+      <p className={cn("mt-2 text-sm font-medium", comparativoCor)}>{comparativo}</p>
+    </article>
   );
 }
 
@@ -158,6 +199,8 @@ export function IndicadoresPainel() {
           {ATIVIDADES.map((atividade) =>
             atividade.id === "reconhecimentos" ? (
               <CardReconhecimentos key={atividade.id} />
+            ) : atividade.id === "acessos-diarios" ? (
+              <CardAcessosDiarios key={atividade.id} />
             ) : (
               <CardAtividade
                 key={atividade.id}
