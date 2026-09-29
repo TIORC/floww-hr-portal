@@ -106,6 +106,210 @@ export type Database = {
           },
         ]
       }
+      planos_desenvolvimento: {
+        Row: {
+          atualizado_em: string
+          colaborador_id: string
+          criado_em: string
+          criado_por: string
+          descricao: string
+          id: string
+          prazo: string | null
+          status: string
+          titulo: string
+        }
+        Insert: {
+          atualizado_em?: string
+          colaborador_id: string
+          criado_em?: string
+          criado_por?: string
+          descricao?: string
+          id?: string
+          prazo?: string | null
+          status?: string
+          titulo: string
+        }
+        Update: {
+          atualizado_em?: string
+          colaborador_id?: string
+          criado_em?: string
+          criado_por?: string
+          descricao?: string
+          id?: string
+          prazo?: string | null
+          status?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planos_desenvolvimento_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdi_objetivos: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          descricao: string
+          id: string
+          plano_id: string
+          prazo: string | null
+          status: string
+          titulo: string
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          descricao?: string
+          id?: string
+          plano_id: string
+          prazo?: string | null
+          status?: string
+          titulo: string
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          descricao?: string
+          id?: string
+          plano_id?: string
+          prazo?: string | null
+          status?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdi_objetivos_plano_id_fkey"
+            columns: ["plano_id"]
+            isOneToOne: false
+            referencedRelation: "planos_desenvolvimento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pesquisas_satisfacao: {
+        Row: {
+          anonima: boolean
+          criado_em: string
+          criado_por: string
+          descricao: string
+          id: string
+          prazo: string
+          tipo: string
+          titulo: string
+        }
+        Insert: {
+          anonima?: boolean
+          criado_em?: string
+          criado_por?: string
+          descricao: string
+          id?: string
+          prazo: string
+          tipo?: string
+          titulo: string
+        }
+        Update: {
+          anonima?: boolean
+          criado_em?: string
+          criado_por?: string
+          descricao?: string
+          id?: string
+          prazo?: string
+          tipo?: string
+          titulo?: string
+        }
+        Relationships: []
+      }
+      reunioes_1a1: {
+        Row: {
+          categoria: string | null
+          colaborador_id: string
+          criado_em: string
+          data_reuniao: string
+          frequencia: string
+          hora_fim: string
+          hora_inicio: string
+          id: string
+          organizador_id: string
+          recorrencia_ate: string | null
+          status: string
+        }
+        Insert: {
+          categoria?: string | null
+          colaborador_id: string
+          criado_em?: string
+          data_reuniao: string
+          frequencia?: string
+          hora_fim: string
+          hora_inicio: string
+          id?: string
+          organizador_id: string
+          recorrencia_ate?: string | null
+          status?: string
+        }
+        Update: {
+          categoria?: string | null
+          colaborador_id?: string
+          criado_em?: string
+          data_reuniao?: string
+          frequencia?: string
+          hora_fim?: string
+          hora_inicio?: string
+          id?: string
+          organizador_id?: string
+          recorrencia_ate?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reunioes_1a1_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reunioes_1a1_organizador_id_fkey"
+            columns: ["organizador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reunioes_1a1_topicos: {
+        Row: {
+          criado_em: string
+          id: string
+          reuniao_id: string
+          titulo: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          reuniao_id: string
+          titulo: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          reuniao_id?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reunioes_1a1_topicos_reuniao_id_fkey"
+            columns: ["reuniao_id"]
+            isOneToOne: false
+            referencedRelation: "reunioes_1a1"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       perfil_colaborador: {
@@ -130,6 +334,21 @@ export type Database = {
       registrar_acesso_diario: {
         Args: { p_colaborador_id: string };
         Returns: void;
+      };
+      listar_equipe_colaborador: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          id: string;
+          user_id: string;
+          nome: string;
+          cargo: string;
+          setor: string;
+          setor_sigla: string;
+        }[];
+      };
+      colaborador_compartilha_setor: {
+        Args: { p_colaborador_id: string };
+        Returns: boolean;
       };
     }
     Enums: {

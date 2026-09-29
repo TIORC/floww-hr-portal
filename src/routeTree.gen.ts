@@ -10,12 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AvaliacoesRouteImport } from './routes/avaliacoes'
 import { Route as CarregandoRouteImport } from './routes/carregando'
+import { Route as ComunicadosRouteImport } from './routes/comunicados'
+import { Route as FeedbacksRouteImport } from './routes/feedbacks'
+import { Route as GamificacaoRouteImport } from './routes/gamificacao'
+import { Route as MapeamentoRiscosPsicossociaisRouteImport } from './routes/mapeamento-riscos-psicossociais'
 import { Route as PainelRouteImport } from './routes/painel'
+import { Route as PlanosDesenvolvimentoRouteImport } from './routes/planos-desenvolvimento'
+import { Route as Reunioes11RouteImport } from './routes/reunioes-1-1'
+import { Route as TodasAsPesquisasRouteImport } from './routes/todas-as-pesquisas'
+import { Route as AvaliacoesAutoavaliacoesRouteImport } from './routes/avaliacoes.autoavaliacoes'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AvaliacoesRoute = AvaliacoesRouteImport.update({
+  id: '/avaliacoes',
+  path: '/avaliacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CarregandoRoute = CarregandoRouteImport.update({
@@ -23,40 +37,154 @@ const CarregandoRoute = CarregandoRouteImport.update({
   path: '/carregando',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComunicadosRoute = ComunicadosRouteImport.update({
+  id: '/comunicados',
+  path: '/comunicados',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedbacksRoute = FeedbacksRouteImport.update({
+  id: '/feedbacks',
+  path: '/feedbacks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamificacaoRoute = GamificacaoRouteImport.update({
+  id: '/gamificacao',
+  path: '/gamificacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapeamentoRiscosPsicossociaisRoute =
+  MapeamentoRiscosPsicossociaisRouteImport.update({
+    id: '/mapeamento-riscos-psicossociais',
+    path: '/mapeamento-riscos-psicossociais',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PainelRoute = PainelRouteImport.update({
   id: '/painel',
   path: '/painel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlanosDesenvolvimentoRoute = PlanosDesenvolvimentoRouteImport.update({
+  id: '/planos-desenvolvimento',
+  path: '/planos-desenvolvimento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Reunioes11Route = Reunioes11RouteImport.update({
+  id: '/reunioes-1-1',
+  path: '/reunioes-1-1',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TodasAsPesquisasRoute = TodasAsPesquisasRouteImport.update({
+  id: '/todas-as-pesquisas',
+  path: '/todas-as-pesquisas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AvaliacoesAutoavaliacoesRoute =
+  AvaliacoesAutoavaliacoesRouteImport.update({
+    id: '/autoavaliacoes',
+    path: '/autoavaliacoes',
+    getParentRoute: () => AvaliacoesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/avaliacoes': typeof AvaliacoesRouteWithChildren
   '/carregando': typeof CarregandoRoute
+  '/comunicados': typeof ComunicadosRoute
+  '/feedbacks': typeof FeedbacksRoute
+  '/gamificacao': typeof GamificacaoRoute
+  '/mapeamento-riscos-psicossociais': typeof MapeamentoRiscosPsicossociaisRoute
   '/painel': typeof PainelRoute
+  '/planos-desenvolvimento': typeof PlanosDesenvolvimentoRoute
+  '/reunioes-1-1': typeof Reunioes11Route
+  '/todas-as-pesquisas': typeof TodasAsPesquisasRoute
+  '/avaliacoes/autoavaliacoes': typeof AvaliacoesAutoavaliacoesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/avaliacoes': typeof AvaliacoesRouteWithChildren
   '/carregando': typeof CarregandoRoute
+  '/comunicados': typeof ComunicadosRoute
+  '/feedbacks': typeof FeedbacksRoute
+  '/gamificacao': typeof GamificacaoRoute
+  '/mapeamento-riscos-psicossociais': typeof MapeamentoRiscosPsicossociaisRoute
   '/painel': typeof PainelRoute
+  '/planos-desenvolvimento': typeof PlanosDesenvolvimentoRoute
+  '/reunioes-1-1': typeof Reunioes11Route
+  '/todas-as-pesquisas': typeof TodasAsPesquisasRoute
+  '/avaliacoes/autoavaliacoes': typeof AvaliacoesAutoavaliacoesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/avaliacoes': typeof AvaliacoesRouteWithChildren
   '/carregando': typeof CarregandoRoute
+  '/comunicados': typeof ComunicadosRoute
+  '/feedbacks': typeof FeedbacksRoute
+  '/gamificacao': typeof GamificacaoRoute
+  '/mapeamento-riscos-psicossociais': typeof MapeamentoRiscosPsicossociaisRoute
   '/painel': typeof PainelRoute
+  '/planos-desenvolvimento': typeof PlanosDesenvolvimentoRoute
+  '/reunioes-1-1': typeof Reunioes11Route
+  '/todas-as-pesquisas': typeof TodasAsPesquisasRoute
+  '/avaliacoes/autoavaliacoes': typeof AvaliacoesAutoavaliacoesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/carregando' | '/painel'
+  fullPaths:
+    | '/'
+    | '/avaliacoes'
+    | '/carregando'
+    | '/comunicados'
+    | '/feedbacks'
+    | '/gamificacao'
+    | '/mapeamento-riscos-psicossociais'
+    | '/painel'
+    | '/planos-desenvolvimento'
+    | '/reunioes-1-1'
+    | '/todas-as-pesquisas'
+    | '/avaliacoes/autoavaliacoes'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/carregando' | '/painel'
-  id: '__root__' | '/' | '/carregando' | '/painel'
+  to:
+    | '/'
+    | '/avaliacoes'
+    | '/carregando'
+    | '/comunicados'
+    | '/feedbacks'
+    | '/gamificacao'
+    | '/mapeamento-riscos-psicossociais'
+    | '/painel'
+    | '/planos-desenvolvimento'
+    | '/reunioes-1-1'
+    | '/todas-as-pesquisas'
+    | '/avaliacoes/autoavaliacoes'
+  id:
+    | '__root__'
+    | '/'
+    | '/avaliacoes'
+    | '/carregando'
+    | '/comunicados'
+    | '/feedbacks'
+    | '/gamificacao'
+    | '/mapeamento-riscos-psicossociais'
+    | '/painel'
+    | '/planos-desenvolvimento'
+    | '/reunioes-1-1'
+    | '/todas-as-pesquisas'
+    | '/avaliacoes/autoavaliacoes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AvaliacoesRoute: typeof AvaliacoesRouteWithChildren
   CarregandoRoute: typeof CarregandoRoute
+  ComunicadosRoute: typeof ComunicadosRoute
+  FeedbacksRoute: typeof FeedbacksRoute
+  GamificacaoRoute: typeof GamificacaoRoute
+  MapeamentoRiscosPsicossociaisRoute: typeof MapeamentoRiscosPsicossociaisRoute
   PainelRoute: typeof PainelRoute
+  PlanosDesenvolvimentoRoute: typeof PlanosDesenvolvimentoRoute
+  Reunioes11Route: typeof Reunioes11Route
+  TodasAsPesquisasRoute: typeof TodasAsPesquisasRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,11 +196,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/avaliacoes': {
+      id: '/avaliacoes'
+      path: '/avaliacoes'
+      fullPath: '/avaliacoes'
+      preLoaderRoute: typeof AvaliacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/carregando': {
       id: '/carregando'
       path: '/carregando'
       fullPath: '/carregando'
       preLoaderRoute: typeof CarregandoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comunicados': {
+      id: '/comunicados'
+      path: '/comunicados'
+      fullPath: '/comunicados'
+      preLoaderRoute: typeof ComunicadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feedbacks': {
+      id: '/feedbacks'
+      path: '/feedbacks'
+      fullPath: '/feedbacks'
+      preLoaderRoute: typeof FeedbacksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gamificacao': {
+      id: '/gamificacao'
+      path: '/gamificacao'
+      fullPath: '/gamificacao'
+      preLoaderRoute: typeof GamificacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mapeamento-riscos-psicossociais': {
+      id: '/mapeamento-riscos-psicossociais'
+      path: '/mapeamento-riscos-psicossociais'
+      fullPath: '/mapeamento-riscos-psicossociais'
+      preLoaderRoute: typeof MapeamentoRiscosPsicossociaisRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/painel': {
@@ -82,13 +245,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PainelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/planos-desenvolvimento': {
+      id: '/planos-desenvolvimento'
+      path: '/planos-desenvolvimento'
+      fullPath: '/planos-desenvolvimento'
+      preLoaderRoute: typeof PlanosDesenvolvimentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reunioes-1-1': {
+      id: '/reunioes-1-1'
+      path: '/reunioes-1-1'
+      fullPath: '/reunioes-1-1'
+      preLoaderRoute: typeof Reunioes11RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/todas-as-pesquisas': {
+      id: '/todas-as-pesquisas'
+      path: '/todas-as-pesquisas'
+      fullPath: '/todas-as-pesquisas'
+      preLoaderRoute: typeof TodasAsPesquisasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/avaliacoes/autoavaliacoes': {
+      id: '/avaliacoes/autoavaliacoes'
+      path: '/autoavaliacoes'
+      fullPath: '/avaliacoes/autoavaliacoes'
+      preLoaderRoute: typeof AvaliacoesAutoavaliacoesRouteImport
+      parentRoute: typeof AvaliacoesRoute
+    }
   }
 }
 
+interface AvaliacoesRouteChildren {
+  AvaliacoesAutoavaliacoesRoute: typeof AvaliacoesAutoavaliacoesRoute
+}
+
+const AvaliacoesRouteChildren: AvaliacoesRouteChildren = {
+  AvaliacoesAutoavaliacoesRoute: AvaliacoesAutoavaliacoesRoute,
+}
+
+const AvaliacoesRouteWithChildren = AvaliacoesRoute._addFileChildren(
+  AvaliacoesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AvaliacoesRoute: AvaliacoesRouteWithChildren,
   CarregandoRoute: CarregandoRoute,
+  ComunicadosRoute: ComunicadosRoute,
+  FeedbacksRoute: FeedbacksRoute,
+  GamificacaoRoute: GamificacaoRoute,
+  MapeamentoRiscosPsicossociaisRoute: MapeamentoRiscosPsicossociaisRoute,
   PainelRoute: PainelRoute,
+  PlanosDesenvolvimentoRoute: PlanosDesenvolvimentoRoute,
+  Reunioes11Route: Reunioes11Route,
+  TodasAsPesquisasRoute: TodasAsPesquisasRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

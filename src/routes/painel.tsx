@@ -4,8 +4,8 @@ import {
   CalendarClock,
   ChevronRight,
   ClipboardCheck,
-  ClipboardList,
   BriefcaseBusiness,
+  BadgeDollarSign,
   MessageCircle,
   X,
   FileSearch,
@@ -14,14 +14,14 @@ import {
   MessageSquareText,
   ListChecks,
   SearchCheck,
+  Settings,
   ShieldAlert,
+  ShieldCheck,
   Smile,
   Sparkles,
   TrendingUp,
   UserSearch,
-  UserMinus,
   UsersRound,
-  Zap,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PerfilFlutuante } from "@/components/perfil-flutuante";
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/painel")({
   component: Painel,
 });
 
-function Sidebar() {
+export function Sidebar() {
   return (
     <aside className="relative z-30 flex min-h-screen flex-col bg-[image:var(--gradient-brand)] px-6 py-7 lg:sticky lg:top-0 lg:h-screen lg:min-h-0">
       <span className="relative font-display text-2xl font-bold tracking-tight text-white">
@@ -79,16 +79,26 @@ function Sidebar() {
             </button>
             <ul className="absolute left-full top-0 z-20 ml-2 hidden w-56 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
               {[
-                { label: "Minhas Avaliações", icon: ClipboardCheck },
-                { label: "Feedback's", icon: MessageSquareText },
-                { label: "Planos de Desenvolvimento", icon: CalendarClock },
-                { label: "Reuniões 1:1", icon: UsersRound },
-              ].map(({ label, icon: Icon }) => (
+                { label: "Avaliações", icon: ClipboardCheck, to: "/avaliacoes" },
+                { label: "Feedback's", icon: MessageSquareText, to: "/feedbacks" },
+                { label: "Planos de Desenvolvimento", icon: CalendarClock, to: "/planos-desenvolvimento" },
+                { label: "Reuniões 1:1", icon: UsersRound, to: "/reunioes-1-1" },
+              ].map(({ label, icon: Icon, to }) => (
                 <li key={label}>
-                  <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
-                    <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
-                    {label}
-                  </span>
+                  {to ? (
+                    <Link
+                      to={to}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white"
+                    >
+                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                      {label}
+                    </Link>
+                  ) : (
+                    <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
+                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                      {label}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -105,21 +115,31 @@ function Sidebar() {
             </button>
             <ul className="absolute left-full top-0 z-20 ml-2 hidden w-56 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
               {[
-                { label: "Comunicados", icon: Megaphone },
-                { label: "Gamificação", icon: Sparkles },
-              ].map(({ label, icon: Icon }) => (
+                { label: "Comunicados", icon: Megaphone, to: "/comunicados" },
+                { label: "Gamificação", icon: Sparkles, to: "/gamificacao" },
+              ].map(({ label, icon: Icon, to }) => (
                 <li key={label}>
-                  <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
-                    <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
-                    {label}
-                  </span>
+                  {to ? (
+                    <Link
+                      to={to}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white"
+                    >
+                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                      {label}
+                    </Link>
+                  ) : (
+                    <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
+                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                      {label}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
           </li>
         </ul>
         <p className="mt-7 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-white/45">
-          Gestão
+          RH
         </p>
         <ul className="mt-3 grid gap-1.5">
           <li className="group relative">
@@ -134,19 +154,21 @@ function Sidebar() {
             </button>
             <ul className="absolute left-full top-0 z-20 ml-2 hidden w-64 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
               {[
-                { label: "Pesquisa de Satisfação", icon: Smile },
-                { label: "Pesquisa Rápida", icon: Zap },
-                { label: "Super Pesquisa", icon: ClipboardList },
+                { label: "Pesquisa de Satisfação", icon: Smile, to: "/todas-as-pesquisas" },
                 { label: "Pesquisa de Engajamento", icon: UsersRound },
-                { label: "Mapeamento de Riscos Psicossociais", icon: ShieldAlert },
-                { label: "Pesquisa de Desligamento", icon: UserMinus },
+                { label: "Mapeamento de Riscos Psicossociais", icon: ShieldAlert, to: "/mapeamento-riscos-psicossociais" },
                 { label: "Planos de Ação", icon: ListChecks },
-              ].map(({ label, icon: Icon }) => (
+              ].map(({ label, icon: Icon, to }) => (
                 <li key={label}>
-                  <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
-                    <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
-                    {label}
-                  </span>
+                  {to ? (
+                    <Link to={to} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white">
+                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />{label}
+                    </Link>
+                  ) : (
+                    <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
+                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />{label}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -166,6 +188,30 @@ function Sidebar() {
                 { label: "Vagas", icon: BriefcaseBusiness },
                 { label: "Processos Seletivos", icon: UserSearch },
                 { label: "DISC", icon: SearchCheck },
+              ].map(({ label, icon: Icon }) => (
+                <li key={label}>
+                  <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
+                    <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                    {label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </li>
+          <li className="group relative">
+            <button
+              type="button"
+              aria-haspopup="true"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-white/70 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            >
+              <Settings className="size-4 shrink-0" aria-hidden />
+              <span className="flex-1">Configurações</span>
+              <ChevronRight className="size-4 shrink-0" aria-hidden />
+            </button>
+            <ul className="absolute left-full top-0 z-20 ml-2 hidden w-56 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
+              {[
+                { label: "Cargos & Salários", icon: BadgeDollarSign },
+                { label: "Permissões", icon: ShieldCheck },
               ].map(({ label, icon: Icon }) => (
                 <li key={label}>
                   <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
