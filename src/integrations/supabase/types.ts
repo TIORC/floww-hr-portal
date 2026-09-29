@@ -106,6 +106,44 @@ export type Database = {
           },
         ]
       }
+      checkins_sentimento: {
+        Row: {
+          atualizado_em: string
+          colaborador_id: string
+          criado_em: string
+          data: string
+          emocao: string
+          id: string
+          motivo: string
+        }
+        Insert: {
+          atualizado_em?: string
+          colaborador_id: string
+          criado_em?: string
+          data?: string
+          emocao: string
+          id?: string
+          motivo?: string
+        }
+        Update: {
+          atualizado_em?: string
+          colaborador_id?: string
+          criado_em?: string
+          data?: string
+          emocao?: string
+          id?: string
+          motivo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkins_sentimento_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       planos_desenvolvimento: {
         Row: {
           atualizado_em: string
@@ -330,6 +368,14 @@ export type Database = {
       get_acessos_diario_comparativo: {
         Args: { p_user_id: string };
         Returns: Json;
+      };
+      obter_checkin_sentimento_do_dia: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      registrar_checkin_sentimento: {
+        Args: { p_colaborador_id: string; p_emocao: string; p_motivo?: string };
+        Returns: void;
       };
       registrar_acesso_diario: {
         Args: { p_colaborador_id: string };

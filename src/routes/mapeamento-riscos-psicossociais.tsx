@@ -8,6 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { gerarAnaliseMapeamentoPsicossocial } from "@/services/mapeamento-psicossocial-ia.functions";
+import type { AiAnalysis, PlanoAcao, PontoAtencao, Prioridade, Recomendacao } from "@/services/mapeamento-psicossocial-ia.functions";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/mapeamento-riscos-psicossociais")({
@@ -38,14 +41,11 @@ type FactorResult = Factor & {
   total: number;
   percent: number;
 };
-type AiAnalysis = {
-  resumo_executivo: string;
-  principais_pontos_atencao: string[];
-  analise: string;
-  recomendacoes: string[];
-};
 
 const DEMO_TOTAL = 72;
+// SCAFFOLD TEMPORÁRIO: UUID inerte usado apenas para satisfazer o validador do servidor
+// no cenário demonstrativo. Nenhuma avaliação real possui este id.
+const DEMO_AVALIACAO_ID = "00000000-0000-4000-8000-000000000000";
 const DEMO_FACTOR_COUNTS = [35, 26, 38, 23, 13, 30, 34, 27, 25, 32, 18, 9, 29];
 const DEMO_FACTOR_NAMES = [
   "Sobrecarga de trabalho",
@@ -94,6 +94,10 @@ function getDistribution(row: Aggregate) {
 
 function formatPercent(value: number) {
   return `${new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 }).format(value)}%`;
+}
+
+function round1(value: number) {
+  return Math.round(value * 10) / 10;
 }
 
 function MapeamentoRiscosPsicossociaisPage() {
@@ -203,7 +207,39 @@ function MapeamentoRiscosPsicossociaisPage() {
   const currentAnalysisKey = `${demoActive ? "demo" : activeAssessmentId}:${selectedSector}`;
 
   const handleGenerateAnalysis = async () => {
-    if (demoActive || !activeAssessmentId || chartFactors.length === 0 || aiLoading) return;
+    // SCAFFOLD TEMPORÁRIO: o cenário demonstrativo envia seus dados fictícios para a IA.
+    // Restaurar o bloqueio de demoActive quando o scaffold for removido.
+    if (aiLoading) return;
+    if (demoActive) {
+      setAiLoading(true);
+      setAiError("");
+      setAiAnalysis(null);
+      setAiAnalysisKey("");
+      try {
+        const result = await gerarAnaliseMapeamentoPsicossocial({
+          data: {
+            avaliacaoId: DEMO_AVALIACAO_ID,
+            setorId: null,
+            demo: true,
+            demoTotal: DEMO_TOTAL,
+            demoFatores: DEMO_FACTORS.map((factor) => ({
+              nome: factor.nome,
+              percentual: round1(factor.percent),
+              relataram: factor.reported,
+              nao_relataram: factor.notReported,
+            })),
+          },
+        });
+        setAiAnalysis(result);
+        setAiAnalysisKey(currentAnalysisKey);
+      } catch (cause) {
+        setAiError(cause instanceof Error ? cause.message : "Não foi possível gerar a análise. Tente novamente.");
+      } finally {
+        setAiLoading(false);
+      }
+      return;
+    }
+    if (!activeAssessmentId || chartFactors.length === 0) return;
     setAiLoading(true);
     setAiError("");
     setAiAnalysis(null);
@@ -357,7 +393,7 @@ function MapeamentoRiscosPsicossociaisPage() {
                   <p className="mt-1 text-sm text-muted-foreground">Análise baseada somente nos resultados agregados desta seleção.</p>
                 </div>
               </div>
-              <Button type="button" onClick={handleGenerateAnalysis} disabled={demoActive || loading || aiLoading || !activeAssessmentId || chartFactors.length === 0}>
+              <Button type="button" onClick={handleGenerateAnalysis} disabled={loading || aiLoading || (!demoActive && (!activeAssessmentId || chartFactors.length === 0))}>
                 {aiLoading ? <LoaderCircle className="mr-2 size-4 animate-spin" aria-hidden /> : <Sparkles className="mr-2 size-4" aria-hidden />}
                 {aiLoading ? "Analisando…" : aiAnalysisKey === currentAnalysisKey ? "Gerar nova análise" : "Gerar análise"}
               </Button>
@@ -366,14 +402,37 @@ function MapeamentoRiscosPsicossociaisPage() {
               {aiError && <div role="alert" className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{aiError}</div>}
               {aiLoading && <div role="status" className="mb-4 flex items-center gap-2 rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground"><LoaderCircle className="size-4 animate-spin" aria-hidden />A Floww! IA está analisando os dados agregados…</div>}
               {!aiLoading && aiAnalysis && aiAnalysisKey === currentAnalysisKey && <div className="grid gap-5 md:grid-cols-2">
-                <AnalysisBlock title="Resumo executivo"><p>{aiAnalysis.resumo_executivo}</p></AnalysisBlock>
-                <AnalysisBlock title="Principais pontos de atenção"><AnalysisList items={aiAnalysis.principais_pontos_atencao} /></AnalysisBlock>
-                <AnalysisBlock title="Análise"><p>{aiAnalysis.analise}</p></AnalysisBlock>
-                <AnalysisBlock title="Recomendações"><AnalysisList items={aiAnalysis.recomendacoes} /></AnalysisBlock>
+                {demoActive && <p role="status" className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 md:col-span-2">
+                  Análise gerada sobre dados fictícios do cenário demonstrativo. Não representa uma avaliação real nem colaboradores.
+                </p>}
+                <AnalysisBlock title="1. Resumo executivo">
+                  <p>{aiAnalysis.resumo_executivo}</p>
+                  {aiAnalysis.indice_atencao !== null && <p className="mt-3 text-xs text-muted-foreground">
+                    Índice de atenção psicossocial considerado: <span className="font-medium text-foreground">{formatPercent(aiAnalysis.indice_atencao)}</span>.
+                  </p>}
+                </AnalysisBlock>
+                <AnalysisBlock title="2. Principais pontos de atenção">
+                  <AttentionPointList items={aiAnalysis.pontos_atencao} />
+                </AnalysisBlock>
+                <AnalysisBlock title="3. Análise dos resultados">
+                  <p>{aiAnalysis.analise_resultados}</p>
+                </AnalysisBlock>
+                <AnalysisBlock title="4. Recomendações">
+                  <RecommendationList items={aiAnalysis.recomendacoes} />
+                </AnalysisBlock>
+                <AnalysisBlock title="5. Plano de ação sugerido" className="md:col-span-2">
+                  <ActionPlanList items={aiAnalysis.plano_acao} />
+                  <p className="mt-4 border-t pt-3 text-xs text-muted-foreground">
+                    Responsável e prazo são sugestões geradas pela Floww! IA, não informações reais sobre a organização. O indicador é o acompanhamento sugerido para a próxima avaliação.
+                  </p>
+                </AnalysisBlock>
+                <AnalysisBlock title="6. Considerações finais" className="md:col-span-2">
+                  <p>{aiAnalysis.consideracoes_finais}</p>
+                </AnalysisBlock>
               </div>}
               {!aiLoading && !aiError && (!aiAnalysis || aiAnalysisKey !== currentAnalysisKey) && <p className="rounded-lg border border-dashed p-5 text-sm text-muted-foreground">
                 {demoActive
-                  ? "A geração da IA fica desativada no cenário demonstrativo. Volte aos dados reais para solicitar uma análise."
+                  ? "Cenário demonstrativo: a análise será gerada a partir dos dados fictícios exibidos no gráfico acima. SCAFFOLD TEMPORÁRIO, será desativado."
                   : chartFactors.length === 0
                   ? "Ainda não há dados agregados suficientes para solicitar uma análise."
                   : "Selecione Gerar análise para receber uma leitura dos fatores desta avaliação. A análise não é executada automaticamente."}
@@ -390,17 +449,75 @@ function MapeamentoRiscosPsicossociaisPage() {
   );
 }
 
-function AnalysisBlock({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="rounded-xl border p-4">
+function AnalysisBlock({ title, className, children }: { title: string; className?: string; children: React.ReactNode }) {
+  return <section className={cn("rounded-xl border p-4", className)}>
     <h3 className="mb-2 font-semibold">{title}</h3>
     <div className="text-sm leading-relaxed text-muted-foreground">{children}</div>
   </section>;
 }
 
-function AnalysisList({ items }: { items: string[] }) {
-  return items.length
-    ? <ul className="list-disc space-y-1.5 pl-5">{items.map((item, index) => <li key={`${index}-${item}`}>{item}</li>)}</ul>
-    : <p>Não há pontos suficientes para destacar.</p>;
+const PRIORIDADE_STYLE: Record<Prioridade, string> = {
+  alta: "bg-destructive/10 text-destructive border-destructive/25",
+  media: "bg-amber-100 text-amber-900 border-amber-300",
+  baixa: "bg-muted text-muted-foreground border-border",
+};
+
+const PRIORIDADE_LABEL: Record<Prioridade, string> = {
+  alta: "Prioridade alta",
+  media: "Prioridade média",
+  baixa: "Prioridade baixa",
+};
+
+function AttentionPointList({ items }: { items: PontoAtencao[] }) {
+  if (!items.length) return <p>Não há pontos de atenção para destacar.</p>;
+  return <ul className="space-y-3">
+    {items.map((item, index) => <li key={`${index}-${item.fator}`} className="rounded-lg border p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="font-medium text-foreground">{item.fator}</span>
+        <Badge variant="outline" className={PRIORIDADE_STYLE[item.prioridade]}>{PRIORIDADE_LABEL[item.prioridade]}</Badge>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {item.percentual === null ? "Percentual não informado" : `${formatPercent(item.percentual)} relataram`}
+        {item.quantidade === null ? " · quantidade não informada" : ` · ${item.quantidade} pessoas relataram`}
+      </p>
+      <p className="mt-2">{item.interpretacao}</p>
+    </li>)}
+  </ul>;
+}
+
+function RecommendationList({ items }: { items: Recomendacao[] }) {
+  if (!items.length) return <p>Não há recomendações para apresentar.</p>;
+  return <ul className="space-y-3">
+    {items.map((item, index) => <li key={`${index}-${item.fator}`}>
+      <p className="font-medium text-foreground">{item.fator}</p>
+      <ul className="list-disc space-y-1 pl-5">
+        {item.acoes.map((acao, acaoIndex) => <li key={`${acaoIndex}-${acao}`}>{acao}</li>)}
+      </ul>
+    </li>)}
+  </ul>;
+}
+
+function ActionPlanList({ items }: { items: PlanoAcao[] }) {
+  if (!items.length) return <p>Não há plano de ação para apresentar.</p>;
+  return <ol className="space-y-4">
+    {items.map((item, index) => <li key={`${index}-${item.fator}`} className="rounded-lg border p-3">
+      <p className="font-medium text-foreground">{item.fator}</p>
+      <dl className="mt-2 grid gap-1.5 text-xs sm:grid-cols-[7.5rem_minmax(0,1fr)]">
+        <dt className="text-muted-foreground">Situação</dt>
+        <dd>{item.situacao}</dd>
+        <dt className="text-muted-foreground">Ação</dt>
+        <dd>{item.acao}</dd>
+        <dt className="text-muted-foreground">Objetivo</dt>
+        <dd>{item.objetivo}</dd>
+        <dt className="text-muted-foreground">Responsável sugerido</dt>
+        <dd>{item.responsavel_sugerido}</dd>
+        <dt className="text-muted-foreground">Prazo sugerido</dt>
+        <dd>{item.prazo_sugerido_dias > 0 ? `${item.prazo_sugerido_dias} dias` : "Não informado"}</dd>
+        <dt className="text-muted-foreground">Indicador</dt>
+        <dd>{item.indicador}</dd>
+      </dl>
+    </li>)}
+  </ol>;
 }
 
 function Filter({ label, children }: { label: string; children: React.ReactNode }) {

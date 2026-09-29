@@ -26,12 +26,50 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { PerfilFlutuante } from "@/components/perfil-flutuante";
 import { IndicadoresPainel } from "@/components/indicadores-painel";
+import { CheckinSentimento } from "@/components/checkin-sentimento";
 import { RankingMoedas } from "@/components/ranking-moedas";
 import { usePerfil } from "@/hooks/use-perfil";
 import { useRegistrarAcesso } from "@/hooks/use-acessos-diarios";
 import { montarSaudacao } from "@/lib/greeting";
 
 const NAV_ITEMS = [{ to: "/painel", label: "Início", icon: Home }] as const;
+
+const FLOWW_BALLOON_MESSAGES = [
+  "Prazer! Eu sou a Floww IA. Meu trabalho é facilitar sua experiência por aqui, desde encontrar uma funcionalidade até entender seus próprios resultados.",
+  "Oi! Eu sou a Floww IA. Posso ajudar você a entender melhor sua jornada dentro da plataforma e encontrar as informações que procura.",
+  "Tenho respostas sobre os recursos da plataforma e posso ajudar você a interpretar seus feedbacks e resultados.",
+  "Quer descobrir o que seus feedbacks estão dizendo sobre sua evolução? Posso analisar os dados disponíveis e apresentar os principais insights.",
+  "Posso resumir seus feedbacks para você. Em vez de analisar várias informações separadamente, posso apresentar os pontos mais relevantes de forma objetiva.",
+  "Recebeu vários feedbacks? Posso ajudar a organizar as informações e destacar aquilo que merece mais atenção.",
+  "Posso ajudar você a transformar feedbacks em ações. A partir das informações disponíveis, posso sugerir pontos que merecem atenção ou desenvolvimento.",
+  "Quer saber quais pontos aparecem com mais frequência nos seus feedbacks? Posso analisar as informações disponíveis e mostrar os principais padrões.",
+  "Seus resultados mudaram ao longo do tempo? Quando houver histórico disponível, posso ajudar você a entender essa evolução.",
+  "Não encontrou alguma coisa? Me diga o que você está procurando e posso indicar onde encontrar na plataforma.",
+  "Está procurando uma funcionalidade? Posso orientar você sobre onde ela está e explicar como utilizá-la.",
+  "Não sabe onde acessar seus resultados? Posso indicar o caminho dentro da plataforma.",
+  "Quer encontrar seus feedbacks? Posso mostrar onde eles ficam e explicar como consultar as informações.",
+  "Está tentando encontrar algum recurso? Descreva o que precisa e eu posso orientar sua navegação.",
+  "Não precisa explorar todos os menus sozinho. Pergunte onde encontrar uma funcionalidade e eu ajudo você a chegar até ela.",
+  "Quer saber onde fica determinada informação? É só me dizer o que procura. Posso indicar o local correspondente na plataforma.",
+  "Se estiver perdido entre tantos menus, eu posso ajudar. Diga o que você precisa fazer e indicarei o caminho disponível.",
+  "Posso ser seu guia pela plataforma. Pergunte como acessar uma funcionalidade, consultar uma informação ou realizar determinada ação.",
+  "Não sabe como fazer alguma coisa por aqui? Me explique o que deseja realizar e eu apresentarei as instruções disponíveis.",
+  "Quer aprender a utilizar melhor a plataforma? Posso explicar os principais recursos e orientar você passo a passo.",
+  "Posso ajudar você a entender como cada recurso funciona. Pergunte sobre qualquer funcionalidade disponível para o seu perfil.",
+  "Tem dúvida sobre alguma ferramenta? Posso explicar para que ela serve e como utilizá-la.",
+  "Quer saber o que pode fazer dentro da plataforma? Posso apresentar os recursos disponíveis para o seu perfil.",
+  "Posso explicar os recursos da plataforma de maneira simples, sem transformar uma dúvida de dois minutos em um curso de três horas.",
+  "Está usando uma funcionalidade pela primeira vez? Posso explicar o que ela faz e orientar os próximos passos.",
+  "Quer descobrir recursos que talvez ainda não tenha utilizado? Posso apresentar funcionalidades disponíveis para você.",
+  "Posso ajudar você a navegar pela plataforma, entender seus resultados e aproveitar melhor os recursos disponíveis.",
+  "Se tiver dúvida sobre como realizar alguma tarefa, pergunte. Posso explicar o procedimento com base nas funcionalidades disponíveis para seu perfil.",
+  "Minha função por aqui é facilitar as coisas. Posso explicar recursos, orientar sua navegação e ajudar você a entender seus resultados.",
+];
+
+function randomBalloonMessageIndex(currentIndex: number) {
+  const next = Math.floor(Math.random() * (FLOWW_BALLOON_MESSAGES.length - 1));
+  return next >= currentIndex ? next + 1 : next;
+}
 
 export const Route = createFileRoute("/painel")({
   head: () => ({
@@ -154,7 +192,7 @@ export function Sidebar() {
             </button>
             <ul className="absolute left-full top-0 z-20 ml-2 hidden w-64 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
               {[
-                { label: "Pesquisa de Satisfação", icon: Smile, to: "/todas-as-pesquisas" },
+                { label: "Todas as Pesquisas", icon: Smile, to: "/todas-as-pesquisas" },
                 { label: "Pesquisa de Engajamento", icon: UsersRound },
                 { label: "Mapeamento de Riscos Psicossociais", icon: ShieldAlert, to: "/mapeamento-riscos-psicossociais" },
                 { label: "Planos de Ação", icon: ListChecks },
@@ -263,7 +301,17 @@ function Saudacao() {
 function Painel() {
   const navigate = useNavigate();
   const [chatAberto, setChatAberto] = useState(false);
+  const [balloonMessageIndex, setBalloonMessageIndex] = useState(0);
   const { mutate: registrarAcesso } = useRegistrarAcesso();
+
+  useEffect(() => {
+    if (chatAberto) return;
+    setBalloonMessageIndex((current) => randomBalloonMessageIndex(current));
+    const intervalId = window.setInterval(() => {
+      setBalloonMessageIndex((current) => randomBalloonMessageIndex(current));
+    }, 5000);
+    return () => window.clearInterval(intervalId);
+  }, [chatAberto]);
 
   useEffect(() => {
     let cancelled = false;
@@ -294,20 +342,21 @@ function Painel() {
         </div>
         <Saudacao />
         <IndicadoresPainel />
+        <CheckinSentimento />
         <RankingMoedas />
       </main>
       <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
         {chatAberto ? (
           <section
             aria-label="Chat com a assistente"
-            className="mb-2 flex h-[25rem] w-[min(21rem,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/10"
+            className="mb-2 flex h-[25rem] w-[min(21rem,calc(100vw-2.5rem))] translate-y-[84px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/10"
           >
             <header className="flex items-center justify-between bg-[image:var(--gradient-brand)] px-4 py-3 text-white">
               <div className="flex items-center gap-2.5">
                 <img src="/and.png" alt="" className="size-9 object-contain" />
                 <div>
                   <p className="text-sm font-semibold">Assistente Floww</p>
-                  <p className="text-xs text-white/75">Se precisar, eu estou aqui, viu?</p>
+                  <OnlineStatus />
                 </div>
               </div>
               <button
@@ -341,8 +390,8 @@ function Painel() {
             </div>
           </section>
         ) : (
-          <div className="relative z-10 translate-y-14 max-w-60 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-lg ring-1 ring-black/5">
-            Se precisar, eu estou aqui, viu?
+          <div className="relative z-10 -translate-x-14 translate-y-[5rem] max-w-60 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-lg ring-1 ring-black/5">
+            {FLOWW_BALLOON_MESSAGES[balloonMessageIndex]}
             <span aria-hidden className="absolute -bottom-1.5 right-7 size-3 rotate-45 bg-white" />
           </div>
         )}
@@ -353,9 +402,21 @@ function Painel() {
           onClick={() => setChatAberto((aberto) => !aberto)}
           className="rounded-full transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
         >
-          <img src="/and.png" alt="" className="size-42 object-contain drop-shadow-lg" />
+          <img src="/and.png" alt="" className="size-42 translate-y-10 object-contain drop-shadow-lg" />
         </button>
       </div>
     </div>
+  );
+}
+
+function OnlineStatus() {
+  return (
+    <span role="status" aria-label="Assistente Floww online" className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+      <span className="relative flex size-2" aria-hidden>
+        <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+        <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+      </span>
+      Online
+    </span>
   );
 }
