@@ -90,23 +90,30 @@ alter table public.perguntas_psicossociais enable row level security;
 alter table public.respostas_psicossociais enable row level security;
 alter table public.resultados_psicossociais enable row level security;
 
+drop policy if exists "authenticated read psychosocial factors" on public.fatores_psicossociais;
 create policy "authenticated read psychosocial factors"
   on public.fatores_psicossociais for select to authenticated using (true);
 
+drop policy if exists "authenticated read psychosocial assessments" on public.avaliacoes_psicossociais;
 create policy "authenticated read psychosocial assessments"
   on public.avaliacoes_psicossociais for select to authenticated using (true);
+drop policy if exists "authors create psychosocial assessments" on public.avaliacoes_psicossociais;
 create policy "authors create psychosocial assessments"
   on public.avaliacoes_psicossociais for insert to authenticated
   with check (criado_por = auth.uid());
+drop policy if exists "authors update psychosocial assessments" on public.avaliacoes_psicossociais;
 create policy "authors update psychosocial assessments"
   on public.avaliacoes_psicossociais for update to authenticated
   using (criado_por = auth.uid()) with check (criado_por = auth.uid());
+drop policy if exists "authors delete psychosocial assessments" on public.avaliacoes_psicossociais;
 create policy "authors delete psychosocial assessments"
   on public.avaliacoes_psicossociais for delete to authenticated
   using (criado_por = auth.uid());
 
+drop policy if exists "authenticated read psychosocial questions" on public.perguntas_psicossociais;
 create policy "authenticated read psychosocial questions"
   on public.perguntas_psicossociais for select to authenticated using (true);
+drop policy if exists "assessment authors manage psychosocial questions" on public.perguntas_psicossociais;
 create policy "assessment authors manage psychosocial questions"
   on public.perguntas_psicossociais for all to authenticated
   using (exists (
@@ -118,16 +125,19 @@ create policy "assessment authors manage psychosocial questions"
     where a.id = avaliacao_id and a.criado_por = auth.uid()
   ));
 
+drop policy if exists "collaborators read own psychosocial answers" on public.respostas_psicossociais;
 create policy "collaborators read own psychosocial answers"
   on public.respostas_psicossociais for select to authenticated
   using (colaborador_id in (
     select c.id from public.colaboradores c where c.user_id = auth.uid()
   ));
+drop policy if exists "collaborators submit own psychosocial answers" on public.respostas_psicossociais;
 create policy "collaborators submit own psychosocial answers"
   on public.respostas_psicossociais for insert to authenticated
   with check (colaborador_id in (
     select c.id from public.colaboradores c where c.user_id = auth.uid()
   ));
+drop policy if exists "collaborators update own psychosocial answers" on public.respostas_psicossociais;
 create policy "collaborators update own psychosocial answers"
   on public.respostas_psicossociais for update to authenticated
   using (colaborador_id in (
@@ -136,18 +146,21 @@ create policy "collaborators update own psychosocial answers"
   with check (colaborador_id in (
     select c.id from public.colaboradores c where c.user_id = auth.uid()
   ));
+drop policy if exists "collaborators delete own psychosocial answers" on public.respostas_psicossociais;
 create policy "collaborators delete own psychosocial answers"
   on public.respostas_psicossociais for delete to authenticated
   using (colaborador_id in (
     select c.id from public.colaboradores c where c.user_id = auth.uid()
   ));
 
+drop policy if exists "assessment authors read psychosocial results" on public.resultados_psicossociais;
 create policy "assessment authors read psychosocial results"
   on public.resultados_psicossociais for select to authenticated
   using (exists (
     select 1 from public.avaliacoes_psicossociais a
     where a.id = avaliacao_id and a.criado_por = auth.uid()
   ));
+drop policy if exists "assessment authors manage psychosocial results" on public.resultados_psicossociais;
 create policy "assessment authors manage psychosocial results"
   on public.resultados_psicossociais for all to authenticated
   using (exists (

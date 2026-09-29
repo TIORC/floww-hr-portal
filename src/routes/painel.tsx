@@ -16,7 +16,6 @@ import {
   SearchCheck,
   Settings,
   ShieldAlert,
-  ShieldCheck,
   Smile,
   Sparkles,
   TrendingUp,
@@ -193,7 +192,6 @@ export function Sidebar() {
             <ul className="absolute left-full top-0 z-20 ml-2 hidden w-64 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
               {[
                 { label: "Todas as Pesquisas", icon: Smile, to: "/todas-as-pesquisas" },
-                { label: "Pesquisa de Engajamento", icon: UsersRound },
                 { label: "Mapeamento de Riscos Psicossociais", icon: ShieldAlert, to: "/mapeamento-riscos-psicossociais" },
                 { label: "Planos de Ação", icon: ListChecks },
               ].map(({ label, icon: Icon, to }) => (
@@ -223,15 +221,22 @@ export function Sidebar() {
             </button>
             <ul className="absolute left-full top-0 z-20 ml-2 hidden w-56 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
               {[
-                { label: "Vagas", icon: BriefcaseBusiness },
-                { label: "Processos Seletivos", icon: UserSearch },
+                { label: "Vagas", icon: BriefcaseBusiness, to: "/vagas" },
+                { label: "Processos Seletivos", icon: UserSearch, to: "/processos-seletivos" },
                 { label: "DISC", icon: SearchCheck },
-              ].map(({ label, icon: Icon }) => (
+              ].map(({ label, icon: Icon, to }) => (
                 <li key={label}>
-                  <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
-                    <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
-                    {label}
-                  </span>
+                  {to ? (
+                    <Link to={to} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white">
+                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                      {label}
+                    </Link>
+                  ) : (
+                    <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
+                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                      {label}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -246,10 +251,10 @@ export function Sidebar() {
               <span className="flex-1">Configurações</span>
               <ChevronRight className="size-4 shrink-0" aria-hidden />
             </button>
-            <ul className="absolute left-full top-0 z-20 ml-2 hidden w-56 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
+            <ul className="absolute left-full top-0 z-20 ml-2 hidden w-72 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
               {[
                 { label: "Cargos & Salários", icon: BadgeDollarSign },
-                { label: "Permissões", icon: ShieldCheck },
+                { label: "Cadastros e Desligamentos", icon: UsersRound },
               ].map(({ label, icon: Icon }) => (
                 <li key={label}>
                   <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">

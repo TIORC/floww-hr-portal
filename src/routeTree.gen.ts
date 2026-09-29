@@ -18,9 +18,12 @@ import { Route as GamificacaoRouteImport } from './routes/gamificacao'
 import { Route as MapeamentoRiscosPsicossociaisRouteImport } from './routes/mapeamento-riscos-psicossociais'
 import { Route as PainelRouteImport } from './routes/painel'
 import { Route as PlanosDesenvolvimentoRouteImport } from './routes/planos-desenvolvimento'
+import { Route as ProcessosSeletivosRouteImport } from './routes/processos-seletivos'
 import { Route as Reunioes11RouteImport } from './routes/reunioes-1-1'
 import { Route as TodasAsPesquisasRouteImport } from './routes/todas-as-pesquisas'
+import { Route as VagasRouteImport } from './routes/vagas'
 import { Route as AvaliacoesAutoavaliacoesRouteImport } from './routes/avaliacoes.autoavaliacoes'
+import { Route as CandidaturaVagaIdRouteImport } from './routes/candidatura.$vagaId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -68,6 +71,11 @@ const PlanosDesenvolvimentoRoute = PlanosDesenvolvimentoRouteImport.update({
   path: '/planos-desenvolvimento',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProcessosSeletivosRoute = ProcessosSeletivosRouteImport.update({
+  id: '/processos-seletivos',
+  path: '/processos-seletivos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Reunioes11Route = Reunioes11RouteImport.update({
   id: '/reunioes-1-1',
   path: '/reunioes-1-1',
@@ -78,12 +86,22 @@ const TodasAsPesquisasRoute = TodasAsPesquisasRouteImport.update({
   path: '/todas-as-pesquisas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VagasRoute = VagasRouteImport.update({
+  id: '/vagas',
+  path: '/vagas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AvaliacoesAutoavaliacoesRoute =
   AvaliacoesAutoavaliacoesRouteImport.update({
     id: '/autoavaliacoes',
     path: '/autoavaliacoes',
     getParentRoute: () => AvaliacoesRoute,
   } as any)
+const CandidaturaVagaIdRoute = CandidaturaVagaIdRouteImport.update({
+  id: '/candidatura/$vagaId',
+  path: '/candidatura/$vagaId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -95,9 +113,12 @@ export interface FileRoutesByFullPath {
   '/mapeamento-riscos-psicossociais': typeof MapeamentoRiscosPsicossociaisRoute
   '/painel': typeof PainelRoute
   '/planos-desenvolvimento': typeof PlanosDesenvolvimentoRoute
+  '/processos-seletivos': typeof ProcessosSeletivosRoute
   '/reunioes-1-1': typeof Reunioes11Route
   '/todas-as-pesquisas': typeof TodasAsPesquisasRoute
+  '/vagas': typeof VagasRoute
   '/avaliacoes/autoavaliacoes': typeof AvaliacoesAutoavaliacoesRoute
+  '/candidatura/$vagaId': typeof CandidaturaVagaIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -109,9 +130,12 @@ export interface FileRoutesByTo {
   '/mapeamento-riscos-psicossociais': typeof MapeamentoRiscosPsicossociaisRoute
   '/painel': typeof PainelRoute
   '/planos-desenvolvimento': typeof PlanosDesenvolvimentoRoute
+  '/processos-seletivos': typeof ProcessosSeletivosRoute
   '/reunioes-1-1': typeof Reunioes11Route
   '/todas-as-pesquisas': typeof TodasAsPesquisasRoute
+  '/vagas': typeof VagasRoute
   '/avaliacoes/autoavaliacoes': typeof AvaliacoesAutoavaliacoesRoute
+  '/candidatura/$vagaId': typeof CandidaturaVagaIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -124,9 +148,12 @@ export interface FileRoutesById {
   '/mapeamento-riscos-psicossociais': typeof MapeamentoRiscosPsicossociaisRoute
   '/painel': typeof PainelRoute
   '/planos-desenvolvimento': typeof PlanosDesenvolvimentoRoute
+  '/processos-seletivos': typeof ProcessosSeletivosRoute
   '/reunioes-1-1': typeof Reunioes11Route
   '/todas-as-pesquisas': typeof TodasAsPesquisasRoute
+  '/vagas': typeof VagasRoute
   '/avaliacoes/autoavaliacoes': typeof AvaliacoesAutoavaliacoesRoute
+  '/candidatura/$vagaId': typeof CandidaturaVagaIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -140,9 +167,12 @@ export interface FileRouteTypes {
     | '/mapeamento-riscos-psicossociais'
     | '/painel'
     | '/planos-desenvolvimento'
+    | '/processos-seletivos'
     | '/reunioes-1-1'
     | '/todas-as-pesquisas'
+    | '/vagas'
     | '/avaliacoes/autoavaliacoes'
+    | '/candidatura/$vagaId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -154,9 +184,12 @@ export interface FileRouteTypes {
     | '/mapeamento-riscos-psicossociais'
     | '/painel'
     | '/planos-desenvolvimento'
+    | '/processos-seletivos'
     | '/reunioes-1-1'
     | '/todas-as-pesquisas'
+    | '/vagas'
     | '/avaliacoes/autoavaliacoes'
+    | '/candidatura/$vagaId'
   id:
     | '__root__'
     | '/'
@@ -168,9 +201,12 @@ export interface FileRouteTypes {
     | '/mapeamento-riscos-psicossociais'
     | '/painel'
     | '/planos-desenvolvimento'
+    | '/processos-seletivos'
     | '/reunioes-1-1'
     | '/todas-as-pesquisas'
+    | '/vagas'
     | '/avaliacoes/autoavaliacoes'
+    | '/candidatura/$vagaId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -183,8 +219,11 @@ export interface RootRouteChildren {
   MapeamentoRiscosPsicossociaisRoute: typeof MapeamentoRiscosPsicossociaisRoute
   PainelRoute: typeof PainelRoute
   PlanosDesenvolvimentoRoute: typeof PlanosDesenvolvimentoRoute
+  ProcessosSeletivosRoute: typeof ProcessosSeletivosRoute
   Reunioes11Route: typeof Reunioes11Route
   TodasAsPesquisasRoute: typeof TodasAsPesquisasRoute
+  VagasRoute: typeof VagasRoute
+  CandidaturaVagaIdRoute: typeof CandidaturaVagaIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -252,6 +291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlanosDesenvolvimentoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/processos-seletivos': {
+      id: '/processos-seletivos'
+      path: '/processos-seletivos'
+      fullPath: '/processos-seletivos'
+      preLoaderRoute: typeof ProcessosSeletivosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reunioes-1-1': {
       id: '/reunioes-1-1'
       path: '/reunioes-1-1'
@@ -266,12 +312,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TodasAsPesquisasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vagas': {
+      id: '/vagas'
+      path: '/vagas'
+      fullPath: '/vagas'
+      preLoaderRoute: typeof VagasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/avaliacoes/autoavaliacoes': {
       id: '/avaliacoes/autoavaliacoes'
       path: '/autoavaliacoes'
       fullPath: '/avaliacoes/autoavaliacoes'
       preLoaderRoute: typeof AvaliacoesAutoavaliacoesRouteImport
       parentRoute: typeof AvaliacoesRoute
+    }
+    '/candidatura/$vagaId': {
+      id: '/candidatura/$vagaId'
+      path: '/candidatura/$vagaId'
+      fullPath: '/candidatura/$vagaId'
+      preLoaderRoute: typeof CandidaturaVagaIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -298,8 +358,11 @@ const rootRouteChildren: RootRouteChildren = {
   MapeamentoRiscosPsicossociaisRoute: MapeamentoRiscosPsicossociaisRoute,
   PainelRoute: PainelRoute,
   PlanosDesenvolvimentoRoute: PlanosDesenvolvimentoRoute,
+  ProcessosSeletivosRoute: ProcessosSeletivosRoute,
   Reunioes11Route: Reunioes11Route,
   TodasAsPesquisasRoute: TodasAsPesquisasRoute,
+  VagasRoute: VagasRoute,
+  CandidaturaVagaIdRoute: CandidaturaVagaIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

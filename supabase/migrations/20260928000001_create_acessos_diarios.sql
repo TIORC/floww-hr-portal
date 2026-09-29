@@ -14,6 +14,7 @@ create index if not exists acessos_diarios_data_idx on public.acessos_diarios (d
 alter table public.acessos_diarios enable row level security;
 
 -- Colaborador vê apenas próprios acessos
+drop policy if exists "colaborador read own accesses" on public.acessos_diarios;
 create policy "colaborador read own accesses"
   on public.acessos_diarios
   for select
@@ -23,6 +24,7 @@ create policy "colaborador read own accesses"
   ));
 
 -- Sistema pode inserir (via service role ou RPC)
+drop policy if exists "system insert accesses" on public.acessos_diarios;
 create policy "system insert accesses"
   on public.acessos_diarios
   for insert

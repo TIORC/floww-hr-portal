@@ -18,6 +18,7 @@ create index if not exists checkins_sentimento_data_idx on public.checkins_senti
 alter table public.checkins_sentimento enable row level security;
 
 -- Colaborador ve apenas o proprio check-in
+drop policy if exists "colaborador read own sentiment checkins" on public.checkins_sentimento;
 create policy "colaborador read own sentiment checkins"
   on public.checkins_sentimento
   for select
@@ -27,6 +28,7 @@ create policy "colaborador read own sentiment checkins"
   ));
 
 -- Colaborador registra apenas o proprio check-in
+drop policy if exists "colaborador insert own sentiment checkins" on public.checkins_sentimento;
 create policy "colaborador insert own sentiment checkins"
   on public.checkins_sentimento
   for insert
@@ -36,6 +38,7 @@ create policy "colaborador insert own sentiment checkins"
   ));
 
 -- Permite sobrescrever a resposta do mesmo dia
+drop policy if exists "colaborador update own sentiment checkins" on public.checkins_sentimento;
 create policy "colaborador update own sentiment checkins"
   on public.checkins_sentimento
   for update

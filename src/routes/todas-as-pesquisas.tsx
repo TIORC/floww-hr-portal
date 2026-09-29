@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { CalendarDays, CheckCircle2, Clock3, Plus, Search, ShieldCheck } from "lucide-react";
+import { ptBR } from "date-fns/locale";
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { BriefcaseBusiness, CalendarDays, CheckCircle2, Clock3, Plus, Search, ShieldCheck, TrendingUp, UsersRound } from "lucide-react";
 import { toast } from "sonner";
 import { PerfilFlutuante } from "@/components/perfil-flutuante";
 import { Sidebar } from "@/routes/painel";
@@ -12,6 +13,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import type { DateRange } from "react-day-picker";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -19,13 +23,14 @@ export const Route = createFileRoute("/todas-as-pesquisas")({ component: TodasAs
 
 type Pesquisa = Tables<"pesquisas_satisfacao">;
 type Filtro = "vigentes" | "historico" | "todas";
-type TipoPesquisa = "satisfacao" | "rapida" | "super" | "desligamento";
+type TipoPesquisa = "satisfacao" | "rapida" | "super" | "desligamento" | "engajamento";
 
 const TIPOS_PESQUISA: { id: TipoPesquisa; label: string }[] = [
   { id: "satisfacao", label: "Pesquisa de Satisfação" },
   { id: "rapida", label: "Pesquisa Rápida" },
   { id: "super", label: "Super Pesquisa" },
   { id: "desligamento", label: "Pesquisa de Desligamento" },
+  { id: "engajamento", label: "Pesquisa de Engajamento" },
 ];
 
 // Métricas ilustrativas para visualizar o painel antes de existir coleta de respostas.
@@ -54,7 +59,45 @@ const DADOS_DEMONSTRATIVOS: Record<TipoPesquisa, { pesquisa: string; respostas: 
     { pesquisa: "Experiência na empresa", respostas: 13, tempoMedio: 6.4 },
     { pesquisa: "Recomendação", respostas: 11, tempoMedio: 2.1 },
   ],
+  engajamento: [
+    { pesquisa: "Engajamento geral", respostas: 94, tempoMedio: 5.4 },
+    { pesquisa: "Reconhecimento e valorização", respostas: 81, tempoMedio: 4.8 },
+    { pesquisa: "Relação com a liderança", respostas: 76, tempoMedio: 6.1 },
+    { pesquisa: "Colaboração e pertencimento", respostas: 68, tempoMedio: 5.7 },
+  ],
 };
+
+const DADOS_TURNOVER_MOTIVO = [
+  { nome: "Baixo Desempenho", quantidade: 8 },
+  { nome: "Nova Oportunidade", quantidade: 7 },
+  { nome: "Pedido de Demissão", quantidade: 5 },
+  { nome: "Justa Causa", quantidade: 3 },
+  { nome: "Outros", quantidade: 2 },
+];
+
+const DADOS_TURNOVER_DEPARTAMENTO = [
+  { nome: "Tecnologia", quantidade: 7 },
+  { nome: "Comercial", quantidade: 6 },
+  { nome: "Operações", quantidade: 4 },
+  { nome: "Administrativo", quantidade: 3 },
+  { nome: "Recursos Humanos", quantidade: 2 },
+];
+
+const DADOS_TURNOVER_TIPO = [
+  { nome: "Voluntário", quantidade: 15 },
+  { nome: "Involuntário", quantidade: 7 },
+];
+
+const HISTORICO_DESLIGAMENTOS = [
+  { mes: "Abr", desligamentos: 3, ativos: 435 },
+  { mes: "Mai", desligamentos: 4, ativos: 438 },
+  { mes: "Jun", desligamentos: 2, ativos: 440 },
+  { mes: "Jul", desligamentos: 5, ativos: 443 },
+  { mes: "Ago", desligamentos: 3, ativos: 445 },
+  { mes: "Set", desligamentos: 5, ativos: 439 },
+];
+
+const CORES_GRAFICO_PIZZA = ["var(--primary)", "var(--accent-yellow)", "var(--accent-green)", "var(--accent-orange)", "var(--muted-foreground)"];
 
 function dataHoje() {
   const agora = new Date();
@@ -160,6 +203,37 @@ function TodasAsPesquisasPage() {
   const [busca, setBusca] = useState("");
   const [dialogAberto, setDialogAberto] = useState(false);
   const [carregando, setCarregando] = useState(true);
+  const [periodoDesligamentos, setPeriodoDesligamentos] = useState<DateRange | undefined>({
+    from: new Date(2026, 3, 1),
+    to: new Date(2026, 8, 30),
+  });
+  const [dataEmPreVisualizacao, setDataEmPreVisualizacao] = useState<Date | undefined>();
+  const [calendarioPeriodoAberto, setCalendarioPeriodoAberto] = useState(false);
+
+  const dadosDoPeriodo = useMemo(() => {
+    if (!periodoDesligamentos?.from || !periodoDesligamentos.to) return HISTORICO_DESLIGAMENTOS;
+    const inicio = new Date(periodoDesligamentos.from.getFullYear(), periodoDesligamentos.from.getMonth(), 1);
+    const fim = new Date(periodoDesligamentos.to.getFullYear(), periodoDesligamentos.to.getMonth() + 1, 0);
+    return HISTORICO_DESLIGAMENTOS.filter((_, index) => {
+      const dataMes = new Date(2026, 3 + index, 15);
+      return dataMes >= inicio && dataMes <= fim;
+    });
+  }, [periodoDesligamentos]);
+  const totalDesligamentosDoPeriodo = dadosDoPeriodo.reduce((total, mes) => total + mes.desligamentos, 0);
+  const mediaAtivosDoPeriodo = dadosDoPeriodo.length
+    ? Math.round(dadosDoPeriodo.reduce((total, mes) => total + mes.ativos, 0) / dadosDoPeriodo.length)
+    : 0;
+  const taxaTurnoverDoPeriodo = mediaAtivosDoPeriodo
+    ? (totalDesligamentosDoPeriodo / mediaAtivosDoPeriodo) * 100
+    : 0;
+  const taxaTurnoverPeriodoChart = [
+    { nome: "Turnover", valor: taxaTurnoverDoPeriodo },
+    { nome: "Demais colaboradores", valor: 100 - taxaTurnoverDoPeriodo },
+  ];
+  const taxaTurnoverMensalChart = dadosDoPeriodo.map((mes) => ({
+    mes: mes.mes,
+    taxa: Number(((mes.desligamentos / mes.ativos) * 100).toFixed(2)),
+  }));
 
   const carregarPesquisas = useCallback(async () => {
     const { data, error } = await supabase.from("pesquisas_satisfacao").select("*").order("criado_em", { ascending: false });
@@ -210,11 +284,199 @@ function TodasAsPesquisasPage() {
                 </Button>
               ))}
             </nav>
-            <div className="grid gap-4 sm:grid-cols-2">
+            {tipoSelecionado === "desligamento" ? (
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-sm font-semibold text-foreground">Periodicidade do consolidado</h2>
+                  <p className="text-xs text-muted-foreground">Clique na data inicial, mova o cursor até a data final e clique novamente para confirmar.</p>
+                </div>
+                <Popover open={calendarioPeriodoAberto} onOpenChange={setCalendarioPeriodoAberto}>
+                  <PopoverTrigger asChild>
+                    <Button type="button" variant="outline" className="justify-start text-left font-normal">
+                      <CalendarDays className="size-4" aria-hidden />
+                      {periodoDesligamentos?.from ? (
+                        periodoDesligamentos.to
+                        ? `${periodoDesligamentos.from.toLocaleDateString("pt-BR")} – ${periodoDesligamentos.to.toLocaleDateString("pt-BR")}`
+                          : `A partir de ${periodoDesligamentos.from.toLocaleDateString("pt-BR")}`
+                      ) : "Selecionar período"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-auto p-0">
+                    <Calendar
+                      mode="range"
+                      selected={periodoDesligamentos}
+                      onSelect={(range) => {
+                        setPeriodoDesligamentos(range);
+                        setDataEmPreVisualizacao(undefined);
+                        if (range?.from && range.to) setCalendarioPeriodoAberto(false);
+                      }}
+                      onDayMouseEnter={(date) => {
+                        if (periodoDesligamentos?.from && !periodoDesligamentos.to) {
+                          setDataEmPreVisualizacao(date);
+                        }
+                      }}
+                      modifiers={{
+                        range_preview: (date) => {
+                          const inicio = periodoDesligamentos?.from;
+                          const fim = dataEmPreVisualizacao;
+                          if (!inicio || periodoDesligamentos.to || !fim) return false;
+                          const menor = Math.min(inicio.getTime(), fim.getTime());
+                          const maior = Math.max(inicio.getTime(), fim.getTime());
+                          return date.getTime() > menor && date.getTime() <= maior;
+                        },
+                      }}
+                      modifiersClassNames={{ range_preview: "bg-accent/70 text-accent-foreground" }}
+                      locale={ptBR}
+                      numberOfMonths={1}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            ) : null}
+            {tipoSelecionado !== "desligamento" ? <div className="grid gap-4 sm:grid-cols-2">
               <Card className="bg-muted/30 shadow-none"><CardContent className="flex items-center gap-3 p-4"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Clock3 className="size-5" /></span><div><p className="text-sm text-muted-foreground">Pesquisas vigentes</p><p className="font-display text-2xl font-semibold">{vigentes}</p></div></CardContent></Card>
               <Card className="bg-muted/30 shadow-none"><CardContent className="flex items-center gap-3 p-4"><span className="grid size-10 place-items-center rounded-xl bg-accent-yellow/30 text-foreground"><CheckCircle2 className="size-5" /></span><div><p className="text-sm text-muted-foreground">Pesquisas no histórico</p><p className="font-display text-2xl font-semibold">{pesquisasDoTipo.length - vigentes}</p></div></CardContent></Card>
-            </div>
+            </div> : (
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <Card className="bg-muted/30 shadow-none">
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><CalendarDays className="size-5" /></span>
+                    <div><p className="text-sm text-muted-foreground">Consolidado do período</p><p className="font-display text-lg font-semibold">{periodoDesligamentos?.from && periodoDesligamentos.to ? `${periodoDesligamentos.from.toLocaleDateString("pt-BR")} – ${periodoDesligamentos.to.toLocaleDateString("pt-BR")}` : "Escolha a data final"}</p></div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-muted/30 shadow-none">
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <span className="grid size-10 place-items-center rounded-xl bg-accent-yellow/30 text-foreground"><TrendingUp className="size-5" /></span>
+                    <div><p className="text-sm text-muted-foreground">Taxa de turnover geral</p><p className="font-display text-2xl font-semibold">{taxaTurnoverDoPeriodo.toFixed(1)}%</p></div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-muted/30 shadow-none">
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><UsersRound className="size-5" /></span>
+                    <div><p className="text-sm text-muted-foreground">Média de Colaboradores Ativos</p><p className="font-display text-2xl font-semibold">{mediaAtivosDoPeriodo}</p></div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-muted/30 shadow-none">
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <span className="grid size-10 place-items-center rounded-xl bg-accent-orange/20 text-foreground"><BriefcaseBusiness className="size-5" /></span>
+                    <div><p className="text-sm text-muted-foreground">Total de desligamentos</p><p className="font-display text-2xl font-semibold">{totalDesligamentosDoPeriodo}</p></div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
+            {tipoSelecionado === "desligamento" ? (
+              <Card className="shadow-none">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Análise de desligamentos</CardTitle>
+                  <p className="text-sm text-muted-foreground">Indicadores demonstrativos de turnover e histórico de desligamentos.</p>
+                </CardHeader>
+                <CardContent className="grid gap-8 lg:grid-cols-2">
+                  <section aria-label="Taxa de turnover do período">
+                    <h3 className="mb-1 text-sm font-semibold">Taxa de turnover do período</h3>
+                    <p className="mb-3 text-xs text-muted-foreground">Desligamentos ÷ média de colaboradores ativos</p>
+                    <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={taxaTurnoverPeriodoChart} dataKey="valor" nameKey="nome" cx="50%" cy="46%" innerRadius={58} outerRadius={86} label={({ name, value }) => name === "Turnover" ? `${Number(value).toFixed(1)}%` : undefined}>
+                            <Cell fill="var(--primary)" />
+                            <Cell fill="var(--muted)" />
+                          </Pie>
+                          <Tooltip formatter={(value, name) => [name === "Turnover" ? `${Number(value).toFixed(1)}%` : `${Number(value).toFixed(1)}%`, name]} />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </section>
+                  <section aria-label="Taxa de turnover por mês">
+                    <h3 className="mb-1 text-sm font-semibold">Taxa de turnover por mês</h3>
+                    <p className="mb-3 text-xs text-muted-foreground">Desligamentos do mês ÷ média de colaboradores ativos no mês</p>
+                    <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={taxaTurnoverMensalChart} margin={{ top: 12, right: 12, bottom: 4, left: -16 }}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                          <XAxis dataKey="mes" axisLine={false} tickLine={false} />
+                          <YAxis unit="%" axisLine={false} tickLine={false} />
+                          <Tooltip formatter={(value) => [`${Number(value).toFixed(2)}%`, "Taxa de turnover"]} />
+                          <Line type="monotone" dataKey="taxa" name="Taxa de turnover" stroke="var(--accent-yellow)" strokeWidth={3} dot={{ r: 4, fill: "var(--accent-yellow)" }} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </section>
+                  <section aria-label="Turnover por motivo">
+                    <h3 className="mb-3 text-sm font-semibold">Turnover por Motivo</h3>
+                    <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={DADOS_TURNOVER_MOTIVO} dataKey="quantidade" nameKey="nome" cx="50%" cy="50%" outerRadius={82} label={({ percent }) => `${((percent ?? 0) * 100).toFixed(0)}%`}>
+                            {DADOS_TURNOVER_MOTIVO.map((item, index) => <Cell key={item.nome} fill={CORES_GRAFICO_PIZZA[index % CORES_GRAFICO_PIZZA.length]} />)}
+                          </Pie>
+                          <Tooltip formatter={(value) => [`${value} desligamentos`, "Total"]} />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </section>
+                  <section aria-label="Turnover por tipo">
+                    <h3 className="mb-3 text-sm font-semibold">Turnover por Tipo</h3>
+                    <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={DADOS_TURNOVER_TIPO} dataKey="quantidade" nameKey="nome" cx="50%" cy="50%" outerRadius={82} label={({ percent }) => `${((percent ?? 0) * 100).toFixed(0)}%`}>
+                            {DADOS_TURNOVER_TIPO.map((item, index) => <Cell key={item.nome} fill={CORES_GRAFICO_PIZZA[index]} />)}
+                          </Pie>
+                          <Tooltip formatter={(value) => [`${value} desligamentos`, "Total"]} />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </section>
+                  <section aria-label="Histórico de desligamentos">
+                    <h3 className="mb-3 text-sm font-semibold">Histórico de Desligamentos</h3>
+                    <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={HISTORICO_DESLIGAMENTOS} margin={{ top: 12, right: 12, bottom: 4, left: -16 }}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                          <XAxis dataKey="mes" axisLine={false} tickLine={false} />
+                          <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
+                          <Tooltip formatter={(value) => [`${value} desligamentos`, "Total"]} />
+                          <Line type="monotone" dataKey="desligamentos" name="Desligamentos" stroke="var(--primary)" strokeWidth={3} dot={{ r: 4, fill: "var(--primary)" }} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </section>
+                  <section aria-label="Top 5 motivos de desligamento">
+                    <h3 className="mb-3 text-sm font-semibold">Top 5 motivos de desligamento</h3>
+                    <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={DADOS_TURNOVER_MOTIVO} layout="vertical" margin={{ top: 4, right: 20, bottom: 4, left: 8 }}>
+                          <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                          <XAxis type="number" allowDecimals={false} />
+                          <YAxis type="category" dataKey="nome" width={142} tick={{ fontSize: 11 }} />
+                          <Tooltip formatter={(value) => [`${value} desligamentos`, "Total"]} />
+                          <Bar dataKey="quantidade" name="Desligamentos" fill="var(--primary)" radius={[0, 5, 5, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </section>
+                  <section aria-label="Turnover por departamento">
+                    <h3 className="mb-3 text-sm font-semibold">Turnover por Departamento</h3>
+                    <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={DADOS_TURNOVER_DEPARTAMENTO} dataKey="quantidade" nameKey="nome" cx="50%" cy="50%" outerRadius={82} label={({ percent }) => `${((percent ?? 0) * 100).toFixed(0)}%`}>
+                            {DADOS_TURNOVER_DEPARTAMENTO.map((item, index) => <Cell key={item.nome} fill={CORES_GRAFICO_PIZZA[index % CORES_GRAFICO_PIZZA.length]} />)}
+                          </Pie>
+                          <Tooltip formatter={(value) => [`${value} desligamentos`, "Total"]} />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </section>
+                </CardContent>
+              </Card>
+            ) : (
             <Card className="shadow-none">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Respostas e tempo de resposta</CardTitle>
@@ -251,6 +513,7 @@ function TodasAsPesquisasPage() {
                 </section>
               </CardContent>
             </Card>
+            )}
 
             <div className="flex flex-col gap-4 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
               <Tabs value={filtro} onValueChange={(value) => setFiltro(value as Filtro)}>

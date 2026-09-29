@@ -32,12 +32,14 @@ alter table public.cargos enable row level security;
 alter table public.colaboradores enable row level security;
 
 -- Setores e cargos sao catalogos: qualquer usuario autenticado pode consultar.
+drop policy if exists "authenticated can read setores" on public.setores;
 create policy "authenticated can read setores"
   on public.setores
   for select
   to authenticated
   using (true);
 
+drop policy if exists "authenticated can read cargos" on public.cargos;
 create policy "authenticated can read cargos"
   on public.cargos
   for select
@@ -45,6 +47,7 @@ create policy "authenticated can read cargos"
   using (true);
 
 -- Colaborador le apenas o proprio registro.
+drop policy if exists "collaboradores read own record" on public.colaboradores;
 create policy "collaboradores read own record"
   on public.colaboradores
   for select

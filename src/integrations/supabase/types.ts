@@ -72,6 +72,7 @@ export type Database = {
           nome: string
           setor_id: string
           user_id: string
+          foto_url: string | null
         }
         Insert: {
           cargo_id: string
@@ -80,6 +81,7 @@ export type Database = {
           nome: string
           setor_id: string
           user_id: string
+          foto_url?: string | null
         }
         Update: {
           cargo_id?: string
@@ -88,6 +90,7 @@ export type Database = {
           nome?: string
           setor_id?: string
           user_id?: string
+          foto_url?: string | null
         }
         Relationships: [
           {
@@ -390,6 +393,7 @@ export type Database = {
           cargo: string;
           setor: string;
           setor_sigla: string;
+          foto_url: string | null;
         }[];
       };
       colaborador_compartilha_setor: {

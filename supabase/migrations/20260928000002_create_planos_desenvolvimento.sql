@@ -29,6 +29,7 @@ create index if not exists pdi_objetivos_plano_id_idx
 alter table public.planos_desenvolvimento enable row level security;
 alter table public.pdi_objetivos enable row level security;
 
+drop policy if exists "colaborador reads own development plans" on public.planos_desenvolvimento;
 create policy "colaborador reads own development plans"
   on public.planos_desenvolvimento for select to authenticated
   using (exists (
@@ -36,6 +37,7 @@ create policy "colaborador reads own development plans"
     where c.id = colaborador_id and c.user_id = auth.uid()
   ));
 
+drop policy if exists "colaborador creates own development plans" on public.planos_desenvolvimento;
 create policy "colaborador creates own development plans"
   on public.planos_desenvolvimento for insert to authenticated
   with check (
@@ -46,6 +48,7 @@ create policy "colaborador creates own development plans"
     )
   );
 
+drop policy if exists "colaborador updates own development plans" on public.planos_desenvolvimento;
 create policy "colaborador updates own development plans"
   on public.planos_desenvolvimento for update to authenticated
   using (exists (
@@ -60,6 +63,7 @@ create policy "colaborador updates own development plans"
     )
   );
 
+drop policy if exists "colaborador deletes own development plans" on public.planos_desenvolvimento;
 create policy "colaborador deletes own development plans"
   on public.planos_desenvolvimento for delete to authenticated
   using (exists (
@@ -67,6 +71,7 @@ create policy "colaborador deletes own development plans"
     where c.id = colaborador_id and c.user_id = auth.uid()
   ));
 
+drop policy if exists "colaborador reads objectives of own plans" on public.pdi_objetivos;
 create policy "colaborador reads objectives of own plans"
   on public.pdi_objetivos for select to authenticated
   using (exists (
@@ -76,6 +81,7 @@ create policy "colaborador reads objectives of own plans"
     where p.id = plano_id and c.user_id = auth.uid()
   ));
 
+drop policy if exists "colaborador creates objectives of own plans" on public.pdi_objetivos;
 create policy "colaborador creates objectives of own plans"
   on public.pdi_objetivos for insert to authenticated
   with check (exists (
@@ -85,6 +91,7 @@ create policy "colaborador creates objectives of own plans"
     where p.id = plano_id and c.user_id = auth.uid()
   ));
 
+drop policy if exists "colaborador updates objectives of own plans" on public.pdi_objetivos;
 create policy "colaborador updates objectives of own plans"
   on public.pdi_objetivos for update to authenticated
   using (exists (
@@ -100,6 +107,7 @@ create policy "colaborador updates objectives of own plans"
     where p.id = plano_id and c.user_id = auth.uid()
   ));
 
+drop policy if exists "colaborador deletes objectives of own plans" on public.pdi_objetivos;
 create policy "colaborador deletes objectives of own plans"
   on public.pdi_objetivos for delete to authenticated
   using (exists (

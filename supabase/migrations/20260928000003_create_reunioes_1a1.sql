@@ -53,6 +53,7 @@ create index if not exists reunioes_1a1_topicos_reuniao_id_idx
 alter table public.reunioes_1a1 enable row level security;
 alter table public.reunioes_1a1_topicos enable row level security;
 
+drop policy if exists "participants read one to one meetings" on public.reunioes_1a1;
 create policy "participants read one to one meetings"
   on public.reunioes_1a1 for select to authenticated
   using (
@@ -60,6 +61,7 @@ create policy "participants read one to one meetings"
     or colaborador_id in (select c.id from public.colaboradores c where c.user_id = auth.uid())
   );
 
+drop policy if exists "colaborador creates same sector meetings" on public.reunioes_1a1;
 create policy "colaborador creates same sector meetings"
   on public.reunioes_1a1 for insert to authenticated
   with check (
@@ -67,6 +69,7 @@ create policy "colaborador creates same sector meetings"
     and public.colaborador_compartilha_setor(colaborador_id)
   );
 
+drop policy if exists "organizer updates own meetings" on public.reunioes_1a1;
 create policy "organizer updates own meetings"
   on public.reunioes_1a1 for update to authenticated
   using (organizador_id in (select c.id from public.colaboradores c where c.user_id = auth.uid()))
@@ -75,10 +78,12 @@ create policy "organizer updates own meetings"
     and public.colaborador_compartilha_setor(colaborador_id)
   );
 
+drop policy if exists "organizer deletes own meetings" on public.reunioes_1a1;
 create policy "organizer deletes own meetings"
   on public.reunioes_1a1 for delete to authenticated
   using (organizador_id in (select c.id from public.colaboradores c where c.user_id = auth.uid()));
 
+drop policy if exists "participants read meeting topics" on public.reunioes_1a1_topicos;
 create policy "participants read meeting topics"
   on public.reunioes_1a1_topicos for select to authenticated
   using (exists (
@@ -90,6 +95,7 @@ create policy "participants read meeting topics"
       )
   ));
 
+drop policy if exists "organizer manages meeting topics" on public.reunioes_1a1_topicos;
 create policy "organizer manages meeting topics"
   on public.reunioes_1a1_topicos for all to authenticated
   using (exists (

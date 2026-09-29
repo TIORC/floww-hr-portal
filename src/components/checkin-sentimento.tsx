@@ -26,7 +26,37 @@ const TITULO_CHECKIN = "checkin-sentimento-titulo";
 const ID_MOTIVO = "checkin-sentimento-motivo";
 
 const ITEM_EMOCAO =
-  "aspect-auto h-auto w-full flex-col gap-2 rounded-2xl border-border bg-background p-3 text-muted-foreground shadow-sm transition-colors hover:border-brand/40 hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring data-[state=checked]:border-brand data-[state=checked]:bg-brand/5 data-[state=checked]:text-foreground [&>span:has(svg)]:hidden";
+  "flex min-h-32 w-full flex-col items-center justify-center gap-3 rounded-2xl border-border bg-background p-4 text-muted-foreground shadow-sm transition-colors hover:border-brand/40 hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring data-[state=checked]:border-brand data-[state=checked]:bg-brand/5 data-[state=checked]:text-foreground [&>span:has(svg)]:hidden";
+
+function ArteEmocao({
+  emocao,
+  imgClassName,
+  emojiClassName,
+}: {
+  emocao: { imagem: string; emoji: string };
+  imgClassName?: string;
+  emojiClassName?: string;
+}) {
+  const [falhou, setFalhou] = useState(false);
+
+  if (falhou) {
+    return (
+      <span aria-hidden="true" className={cn("leading-none", emojiClassName)}>
+        {emocao.emoji}
+      </span>
+    );
+  }
+
+  return (
+    <img
+      src={emocao.imagem}
+      alt=""
+      aria-hidden="true"
+      className={imgClassName}
+      onError={() => setFalhou(true)}
+    />
+  );
+}
 
 function CabecalhoCheckin() {
   return (
@@ -70,7 +100,11 @@ function SeletorEmocoes({
     >
       {EMOCOES_SENTIMENTO.map((emocao) => (
         <RadioGroupItem key={emocao.id} value={emocao.id} className={ITEM_EMOCAO}>
-          <img src={emocao.imagem} alt="" className="size-14 object-contain" aria-hidden />
+          <ArteEmocao
+            emocao={emocao}
+            imgClassName="block size-16 shrink-0 object-contain"
+            emojiClassName="text-5xl leading-none"
+          />
           <span className="text-center text-xs font-semibold leading-tight">{emocao.rotulo}</span>
         </RadioGroupItem>
       ))}
@@ -89,7 +123,13 @@ function RespostaRegistrada({
 
   return (
     <div className="mt-6 flex flex-col items-center gap-5 rounded-2xl border border-border bg-background p-6 sm:flex-row">
-      <img src={emocao?.imagem} alt="" className="size-24 shrink-0 object-contain" aria-hidden />
+      {emocao ? (
+        <ArteEmocao
+          emocao={emocao}
+          imgClassName="size-24 shrink-0 object-contain"
+          emojiClassName="text-6xl leading-none"
+        />
+      ) : null}
 
       <div className="min-w-0 flex-1 text-center sm:text-left">
         <p className="flex items-center justify-center gap-2 font-display text-lg font-bold text-foreground sm:justify-start">
