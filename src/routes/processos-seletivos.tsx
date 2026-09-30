@@ -1,7 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowLeft, BriefcaseBusiness, CalendarDays, Check, ChevronRight, FileText, Mail, MapPin, Phone, Search, Users } from "lucide-react";
+import { toast } from "sonner";
+import { ArrowLeft, BriefcaseBusiness, CalendarDays, Check, ChevronRight, FileText, Mail, MapPin, Phone, Plus, Search, Users } from "lucide-react";
 import { PerfilFlutuante } from "@/components/perfil-flutuante";
+import { AbrirProcessoDialog, type NovoProcessoSeletivo } from "@/components/processos-seletivos/abrir-processo-dialog";
+import { PERFIS_DISC, TONS_DISC, type PerfilDisc, type PercentuaisDisc } from "@/components/processos-seletivos/perfis-disc";
 import { Sidebar } from "@/routes/painel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,9 +19,9 @@ export const Route = createFileRoute("/processos-seletivos")({ component: Proces
 
 const ETAPAS = ["Novos", "Triagem", "Entrevista", "Proposta", "Contratado", "Reprovado"] as const;
 type Etapa = (typeof ETAPAS)[number];
-type Vaga = { id: string; cargo: string; setor: string; gestor: string; candidatos: number; abertura: string; status: "Ativo" | "Fechado" };
+type Vaga = { id: string; cargo: string; setor: string; gestor: string; candidatos: number; abertura: string; status: "Ativo" | "Fechado"; perfilDisc?: PerfilDisc; percentuaisDisc?: PercentuaisDisc };
 type Pessoa = { id: number; nome: string; email: string; telefone: string; data: string; etapa: Etapa; observacoes: string; curriculo: string };
-const VAGAS: Vaga[] = [
+const VAGAS_INICIAIS: Vaga[] = [
   { id: "analista-dados", cargo: "Analista de Dados", setor: "Tecnologia", gestor: "Mariana Costa", candidatos: 18, abertura: "12/08/2025", status: "Ativo" },
   { id: "designer-produto", cargo: "Product Designer", setor: "Produto", gestor: "Rafael Lima", candidatos: 24, abertura: "18/08/2025", status: "Ativo" },
   { id: "analista-rh", cargo: "Analista de RH", setor: "Pessoas", gestor: "Camila Souza", candidatos: 12, abertura: "25/08/2025", status: "Ativo" },
@@ -40,19 +43,36 @@ const PESSOAS_INICIAIS: Pessoa[] = [
 function ProcessosPage() {
   const [vagaSelecionada, setVagaSelecionada] = useState<Vaga | null>(null);
   const [busca, setBusca] = useState("");
+  const [vagas, setVagas] = useState<Vaga[]>(VAGAS_INICIAIS);
   const [pessoas, setPessoas] = useState(PESSOAS_INICIAIS);
   const [pessoaAtiva, setPessoaAtiva] = useState<Pessoa | null>(null);
   const [aba, setAba] = useState("Ativos");
+  const [dialogoAberto, setDialogoAberto] = useState(false);
   const navigate = useNavigate();
-  const filtradas = useMemo(() => VAGAS.filter(v => v.status === aba.slice(0, -1) && v.cargo.toLowerCase().includes(busca.toLowerCase())), [aba, busca]);
+  const filtradas = useMemo(() => vagas.filter(v => v.status === aba.slice(0, -1) && v.cargo.toLowerCase().includes(busca.toLowerCase())), [vagas, aba, busca]);
   const moverPessoa = (id: number, etapa: Etapa) => setPessoas(ps => ps.map(p => p.id === id ? { ...p, etapa } : p));
   const atualizarObservacao = (id: number, observacoes: string) => setPessoas(ps => ps.map(p => p.id === id ? { ...p, observacoes } : p));
+  const abrirProcesso = (novo: NovoProcessoSeletivo) => {
+    setVagas(atuais => [{
+      id: `processo-${novo.cargoId}-${Date.now()}`,
+      cargo: novo.cargo,
+      setor: novo.setor,
+      gestor: "—",
+      candidatos: 0,
+      abertura: novo.dataAbertura.split("-").reverse().join("/"),
+      status: "Ativo",
+      perfilDisc: novo.perfilDisc,
+      percentuaisDisc: novo.percentuaisDisc,
+    }, ...atuais]);
+    setAba("Ativos");
+    toast.success(`Processo seletivo aberto para ${novo.cargo}.`);
+  };
 
   return <div className="grid min-h-screen bg-background lg:grid-cols-[16rem_1fr]"><Sidebar /><main className="min-w-0 p-5 sm:p-8"><div className="mb-5 flex justify-end"><PerfilFlutuante /></div>
     <Card className="min-h-[34rem] rounded-2xl shadow-sm"><CardContent className="p-6 sm:p-8">
       {vagaSelecionada ? <>
         <div className="mb-7 flex flex-wrap items-start justify-between gap-4">
-          <div><Button variant="ghost" className="mb-3 -ml-3" onClick={() => { setVagaSelecionada(null); setPessoaAtiva(null); }}><ArrowLeft className="mr-2 size-4" /> Voltar aos processos</Button><h1 className="font-display text-3xl font-semibold">{vagaSelecionada.cargo}</h1><p className="mt-2 text-sm text-muted-foreground">{vagaSelecionada.setor} <span className="mx-2">·</span> <Badge variant={vagaSelecionada.status === "Ativo" ? "default" : "secondary"}>{vagaSelecionada.status}</Badge></p></div>
+          <div><Button variant="ghost" className="mb-3 -ml-3" onClick={() => { setVagaSelecionada(null); setPessoaAtiva(null); }}><ArrowLeft className="mr-2 size-4" /> Voltar aos processos</Button><h1 className="font-display text-3xl font-semibold">{vagaSelecionada.cargo}</h1><p className="mt-2 text-sm text-muted-foreground">{vagaSelecionada.setor} <span className="mx-2">·</span> <Badge variant={vagaSelecionada.status === "Ativo" ? "default" : "secondary"}>{vagaSelecionada.status}</Badge>{vagaSelecionada.perfilDisc ? <><span className="mx-2">·</span><span className="mt-2 inline-flex flex-wrap items-center gap-1.5">{PERFIS_DISC.map(perfil => { const tom = TONS_DISC[perfil.valor]; const ativo = perfil.valor === vagaSelecionada.perfilDisc; return <span key={perfil.valor} title={`${perfil.valor}: ${vagaSelecionada.percentuaisDisc?.[perfil.valor] ?? 0}%`} className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${tom.chip} ${ativo ? "" : "opacity-40"}`}><span className="grid size-4 place-items-center rounded-full bg-white/25 text-[0.6rem] font-bold">{perfil.atalho}</span>{perfil.valor} {vagaSelecionada.percentuaisDisc?.[perfil.valor] ?? 0}%</span>; })}</span></> : null}</p></div>
           {vagaSelecionada.status === "Ativo" && <Button variant="outline" onClick={() => navigate({ to: "/candidatura/$vagaId", params: { vagaId: vagaSelecionada.id } })}>Ver formulário da vaga <ChevronRight className="ml-1 size-4" /></Button>}
         </div>
         <div className="overflow-x-auto pb-4"><div className="flex min-w-max items-start gap-4">{ETAPAS.map(etapa => {
@@ -63,12 +83,13 @@ function ProcessosPage() {
           </section>;
         })}</div></div>
       </> : <>
-        <header className="mb-7 flex flex-wrap items-start justify-between gap-4"><div><p className="mb-2 flex items-center gap-2 text-sm font-medium text-primary"><BriefcaseBusiness className="size-4" /> Recrutamento</p><h1 className="font-display text-3xl font-semibold">Processos Seletivos</h1><p className="mt-2 text-sm text-muted-foreground">Acompanhe suas vagas e candidatos em cada etapa.</p></div><div className="relative w-full sm:w-72"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"/><Input aria-label="Buscar cargo" placeholder="Buscar por cargo..." value={busca} onChange={e => setBusca(e.target.value)} className="pl-9"/></div></header>
+        <header className="mb-7 flex flex-wrap items-start justify-between gap-4"><div><p className="mb-2 flex items-center gap-2 text-sm font-medium text-primary"><BriefcaseBusiness className="size-4" /> Recrutamento</p><h1 className="font-display text-3xl font-semibold">Processos Seletivos</h1><p className="mt-2 text-sm text-muted-foreground">Acompanhe suas vagas e candidatos em cada etapa.</p></div><div className="flex w-full flex-wrap items-center justify-end gap-3 sm:w-auto"><div className="relative w-full sm:w-72"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"/><Input aria-label="Buscar cargo" placeholder="Buscar por cargo..." value={busca} onChange={e => setBusca(e.target.value)} className="pl-9"/></div><Button type="button" className="shrink-0 rounded-full bg-accent-yellow px-5 text-slate-900 shadow hover:bg-accent-yellow/90 hover:text-slate-900" onClick={() => setDialogoAberto(true)}><Plus className="size-4" aria-hidden />Abrir Processo Seletivo</Button></div></header>
         <Tabs value={aba} onValueChange={setAba}><TabsList className="h-auto w-full justify-start gap-2 rounded-none border-b border-border bg-transparent p-0"><TabsTrigger value="Ativos" className="rounded-t-md rounded-b-none border border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none">Ativos <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs">4</span></TabsTrigger><TabsTrigger value="Fechados" className="rounded-t-md rounded-b-none border border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none">Fechados <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs">2</span></TabsTrigger></TabsList>
           {["Ativos", "Fechados"].map(tab => <TabsContent value={tab} key={tab} className="mt-0"><div className="overflow-x-auto"><Table><TableHeader><TableRow><TableHead>Cargo</TableHead><TableHead>Setor</TableHead><TableHead>Gestor</TableHead><TableHead>Nº de candidatos</TableHead><TableHead>Data de abertura</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody>{filtradas.map(v => <TableRow key={v.id} onClick={() => setVagaSelecionada(v)} className="cursor-pointer"><TableCell className="font-medium">{v.cargo}</TableCell><TableCell>{v.setor}</TableCell><TableCell>{v.gestor}</TableCell><TableCell><span className="flex items-center gap-2"><Users className="size-4 text-muted-foreground"/>{v.candidatos}</span></TableCell><TableCell>{v.abertura}</TableCell><TableCell><Badge variant={v.status === "Ativo" ? "default" : "secondary"}>{v.status}</Badge></TableCell></TableRow>)}</TableBody></Table>{filtradas.length === 0 && <p className="py-12 text-center text-sm text-muted-foreground">Nenhum processo encontrado para “{busca}”.</p>}</div></TabsContent>)}
         </Tabs>
       </>}
     </CardContent></Card>
     <Sheet open={!!pessoaAtiva} onOpenChange={open => !open && setPessoaAtiva(null)}><SheetContent className="w-full overflow-y-auto sm:max-w-md"><SheetHeader className="text-left"><SheetTitle>{pessoaAtiva?.nome}</SheetTitle><SheetDescription>Detalhes da candidatura</SheetDescription></SheetHeader>{pessoaAtiva && <div className="mt-7 space-y-6"><div className="space-y-4 text-sm"><p className="flex items-center gap-3"><Mail className="size-4 text-muted-foreground"/>{pessoaAtiva.email}</p><p className="flex items-center gap-3"><Phone className="size-4 text-muted-foreground"/>{pessoaAtiva.telefone}</p><a href={pessoaAtiva.curriculo} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-primary underline"><FileText className="size-4"/>Abrir currículo em PDF</a><p className="flex items-center gap-3"><MapPin className="size-4 text-muted-foreground"/>Candidatura em {pessoaAtiva.data}</p></div><div><label htmlFor="etapa" className="mb-2 block text-sm font-medium">Etapa atual</label><select id="etapa" value={pessoaAtiva.etapa} onChange={e => { const etapa = e.target.value as Etapa; moverPessoa(pessoaAtiva.id, etapa); setPessoaAtiva({ ...pessoaAtiva, etapa }); }} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">{ETAPAS.map(e => <option key={e}>{e}</option>)}</select></div><div><label htmlFor="observacoes" className="mb-2 block text-sm font-medium">Observações</label><Textarea id="observacoes" rows={5} placeholder="Adicione observações sobre este candidato..." value={pessoaAtiva.observacoes} onChange={e => { atualizarObservacao(pessoaAtiva.id, e.target.value); setPessoaAtiva({ ...pessoaAtiva, observacoes: e.target.value }); }}/></div></div>}</SheetContent></Sheet>
+    <AbrirProcessoDialog open={dialogoAberto} onOpenChange={setDialogoAberto} onCriar={abrirProcesso} />
   </main></div>;
 }

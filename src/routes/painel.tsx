@@ -12,7 +12,6 @@ import {
   Home,
   Megaphone,
   MessageSquareText,
-  ListChecks,
   SearchCheck,
   Settings,
   ShieldAlert,
@@ -193,7 +192,6 @@ export function Sidebar() {
               {[
                 { label: "Todas as Pesquisas", icon: Smile, to: "/todas-as-pesquisas" },
                 { label: "Mapeamento de Riscos Psicossociais", icon: ShieldAlert, to: "/mapeamento-riscos-psicossociais" },
-                { label: "Planos de Ação", icon: ListChecks },
               ].map(({ label, icon: Icon, to }) => (
                 <li key={label}>
                   {to ? (

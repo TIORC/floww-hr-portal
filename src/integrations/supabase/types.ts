@@ -351,6 +351,51 @@ export type Database = {
           },
         ]
       }
+      vagas: {
+        Row: {
+          cargo_id: string
+          criado_em: string
+          criado_por: string | null
+          id: string
+          setor_id: string
+          status: string
+          titulo: string
+        }
+        Insert: {
+          cargo_id: string
+          criado_em?: string
+          criado_por?: string | null
+          id?: string
+          setor_id: string
+          status?: string
+          titulo: string
+        }
+        Update: {
+          cargo_id?: string
+          criado_em?: string
+          criado_por?: string | null
+          id?: string
+          setor_id?: string
+          status?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vagas_cargo_id_fkey"
+            columns: ["cargo_id"]
+            isOneToOne: false
+            referencedRelation: "cargos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vagas_setor_id_fkey"
+            columns: ["setor_id"]
+            isOneToOne: false
+            referencedRelation: "setores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       perfil_colaborador: {
