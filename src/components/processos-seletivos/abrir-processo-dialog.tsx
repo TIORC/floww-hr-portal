@@ -40,8 +40,8 @@ import { cn } from "@/lib/utils";
 
 const OUTRO = "outro";
 
-type Setor = Tables<"setores">;
-type Cargo = Tables<"cargos">;
+type Setor = Pick<Tables<"setores">, "id" | "nome" | "sigla">;
+type Cargo = Pick<Tables<"cargos">, "id" | "nome"> & { setor_id?: string };
 
 const PERCENTUAIS_INICIAIS: PercentuaisDisc = {
   Comunicador: 40,

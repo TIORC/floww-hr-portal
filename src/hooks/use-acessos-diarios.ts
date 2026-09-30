@@ -43,7 +43,7 @@ export function useRegistrarAcesso() {
       if (!perfil) return;
 
       const { error } = await supabase.rpc("registrar_acesso_diario", {
-        p_colaborador_id: perfil.id,
+        p_colaborador_id: perfil.id as string,
       });
 
       if (error) throw error;

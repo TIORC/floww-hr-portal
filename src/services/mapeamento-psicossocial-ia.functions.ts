@@ -497,13 +497,13 @@ export const gerarAnaliseMapeamentoPsicossocial = createServerFn({ method: "POST
   .middleware([requireSupabaseAuth])
   .validator(RequestSchema)
   .handler(async ({ data, context }) => {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env['GEMINI_API_KEY'];
     if (!apiKey)
       throw new Error(
         "A integração da Floww! IA não está configurada no servidor (GEMINI_API_KEY ausente).",
       );
 
-    const models = [process.env.FLOWW_IA_MODEL, ...DEFAULT_MODELS].filter(
+    const models = [process.env['FLOWW_IA_MODEL'], ...DEFAULT_MODELS].filter(
       (model): model is string => Boolean(model && model.trim()),
     );
     const selectedModels = [...new Set(models)];
