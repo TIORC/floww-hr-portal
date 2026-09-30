@@ -29,6 +29,9 @@ import { RankingMoedas } from "@/components/ranking-moedas";
 import { usePerfil } from "@/hooks/use-perfil";
 import { useRegistrarAcesso } from "@/hooks/use-acessos-diarios";
 import { montarSaudacao } from "@/lib/greeting";
+import { consumirOnboarding } from "@/lib/onboarding-sessao";
+import { cn } from "@/lib/utils";
+import { BoasVindasFlafy } from "@/components/onboarding/boas-vindas-flafy";
 
 const NAV_ITEMS = [{ to: "/painel", label: "Início", icon: Home }] as const;
 
@@ -117,7 +120,11 @@ export function Sidebar() {
               {[
                 { label: "Avaliações", icon: ClipboardCheck, to: "/avaliacoes" },
                 { label: "Feedback's", icon: MessageSquareText, to: "/feedbacks" },
-                { label: "Planos de Desenvolvimento", icon: CalendarClock, to: "/planos-desenvolvimento" },
+                {
+                  label: "Planos de Desenvolvimento",
+                  icon: CalendarClock,
+                  to: "/planos-desenvolvimento",
+                },
                 { label: "Reuniões 1:1", icon: UsersRound, to: "/reunioes-1-1" },
               ].map(({ label, icon: Icon, to }) => (
                 <li key={label}>
@@ -191,16 +198,25 @@ export function Sidebar() {
             <ul className="absolute left-full top-0 z-20 ml-2 hidden w-64 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
               {[
                 { label: "Todas as Pesquisas", icon: Smile, to: "/todas-as-pesquisas" },
-                { label: "Mapeamento de Riscos Psicossociais", icon: ShieldAlert, to: "/mapeamento-riscos-psicossociais" },
+                {
+                  label: "Mapeamento de Riscos Psicossociais",
+                  icon: ShieldAlert,
+                  to: "/mapeamento-riscos-psicossociais",
+                },
               ].map(({ label, icon: Icon, to }) => (
                 <li key={label}>
                   {to ? (
-                    <Link to={to} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white">
-                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />{label}
+                    <Link
+                      to={to}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white"
+                    >
+                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                      {label}
                     </Link>
                   ) : (
                     <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
-                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />{label}
+                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                      {label}
                     </span>
                   )}
                 </li>
@@ -225,7 +241,10 @@ export function Sidebar() {
               ].map(({ label, icon: Icon, to }) => (
                 <li key={label}>
                   {to ? (
-                    <Link to={to} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white">
+                    <Link
+                      to={to}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white"
+                    >
                       <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
                       {label}
                     </Link>
@@ -305,7 +324,12 @@ function Painel() {
   const navigate = useNavigate();
   const [chatAberto, setChatAberto] = useState(false);
   const [balloonMessageIndex, setBalloonMessageIndex] = useState(0);
+  const [boasVindasAberto, setBoasVindasAberto] = useState(false);
   const { mutate: registrarAcesso } = useRegistrarAcesso();
+
+  useEffect(() => {
+    if (consumirOnboarding()) setBoasVindasAberto(true);
+  }, []);
 
   useEffect(() => {
     if (chatAberto) return;
@@ -347,8 +371,14 @@ function Painel() {
         <IndicadoresPainel />
         <CheckinSentimento />
         <RankingMoedas />
+        <BoasVindasFlafy aberto={boasVindasAberto} onFechar={() => setBoasVindasAberto(false)} />
       </main>
-      <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+      <div
+        className={cn(
+          "fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3",
+          boasVindasAberto && "hidden",
+        )}
+      >
         {chatAberto ? (
           <section
             aria-label="Chat com a assistente"
@@ -405,7 +435,11 @@ function Painel() {
           onClick={() => setChatAberto((aberto) => !aberto)}
           className="rounded-full transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
         >
-          <img src="/and.png" alt="" className="size-42 translate-y-10 object-contain drop-shadow-lg" />
+          <img
+            src="/and.png"
+            alt=""
+            className="size-42 translate-y-10 object-contain drop-shadow-lg"
+          />
         </button>
       </div>
     </div>
@@ -414,7 +448,11 @@ function Painel() {
 
 function OnlineStatus() {
   return (
-    <span role="status" aria-label="Assistente Floww online" className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+    <span
+      role="status"
+      aria-label="Assistente Floww online"
+      className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800"
+    >
       <span className="relative flex size-2" aria-hidden>
         <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
         <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />

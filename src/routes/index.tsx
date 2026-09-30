@@ -4,6 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 import { BrandBubbles } from "@/components/brand-bubbles";
+import { marcarSaidaDoLogin } from "@/lib/onboarding-sessao";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,6 +47,7 @@ function Login() {
       return;
     }
     setMessage({ kind: "ok", text: "Bem-vindo de volta!" });
+    marcarSaidaDoLogin();
     navigate({ to: "/carregando" });
   }
 
@@ -90,8 +92,8 @@ function Login() {
           />
           <div className="mt-5 h-2 w-40 rounded-full bg-[image:var(--gradient-accent)]" />
           <p className="mt-7 max-w-md text-base leading-relaxed text-muted-foreground">
-            Pessoas, admissões, ponto e folha em um só fluxo. Simples para o time,
-            completo para o RH.
+            Pessoas, admissões, ponto e folha em um só fluxo. Simples para o time, completo para o
+            RH.
           </p>
         </div>
       </section>
@@ -126,29 +128,28 @@ function Login() {
           <label className="mt-6 block text-sm font-medium text-form-foreground" htmlFor="password">
             Senha
           </label>
-      <div className="relative mt-2">
-        <input
-          id="password"
-          type={showPassword ? "text" : "password"}
-          required
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
-          className="w-full rounded-xl border border-form-border bg-form-field py-3 pl-4 pr-12 text-sm text-form-foreground placeholder:text-form-foreground/45 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/30"
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword((v) => !v)}
-          aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-          aria-pressed={showPassword}
-          title={showPassword ? "Ocultar senha" : "Mostrar senha"}
-          className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-form-foreground/55 transition hover:text-brand focus-visible:ring-2 focus-visible:ring-brand/50 focus-visible:outline-none"
-        >
-          {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-        </button>
-      </div>
-
+          <div className="relative mt-2">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full rounded-xl border border-form-border bg-form-field py-3 pl-4 pr-12 text-sm text-form-foreground placeholder:text-form-foreground/45 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/30"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              aria-pressed={showPassword}
+              title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-form-foreground/55 transition hover:text-brand focus-visible:ring-2 focus-visible:ring-brand/50 focus-visible:outline-none"
+            >
+              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          </div>
 
           <div className="mt-4 flex justify-end">
             <button

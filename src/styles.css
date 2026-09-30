@@ -250,6 +250,20 @@
   will-change: transform;
 }
 
+@keyframes caret-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@utility brand-caret {
+  animation: caret-blink 1s step-end infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .brand-bubble {
     animation: none;
@@ -258,7 +272,8 @@
 
   .brand-spiral,
   .brand-message,
-  .brand-wave {
+  .brand-wave,
+  .brand-caret {
     animation: none;
   }
 }
