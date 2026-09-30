@@ -14,26 +14,85 @@ export type Database = {
   }
   public: {
     Tables: {
-      setores: {
+      acessos_diarios: {
+        Row: {
+          colaborador_id: string
+          criado_em: string
+          data: string
+          id: string
+        }
+        Insert: {
+          colaborador_id: string
+          criado_em?: string
+          data?: string
+          id?: string
+        }
+        Update: {
+          colaborador_id?: string
+          criado_em?: string
+          data?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acessos_diarios_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "acessos_diarios_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "perfil_colaborador"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      avaliacoes_psicossociais: {
         Row: {
           criado_em: string
+          criado_por: string
+          data_fim: string | null
+          data_inicio: string | null
+          descricao: string | null
           id: string
-          nome: string
-          sigla: string
+          setor_id: string | null
+          status: string
+          titulo: string
         }
         Insert: {
           criado_em?: string
+          criado_por?: string
+          data_fim?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
           id?: string
-          nome: string
-          sigla: string
+          setor_id?: string | null
+          status?: string
+          titulo: string
         }
         Update: {
           criado_em?: string
+          criado_por?: string
+          data_fim?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
           id?: string
-          nome?: string
-          sigla?: string
+          setor_id?: string | null
+          status?: string
+          titulo?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "avaliacoes_psicossociais_setor_id_fkey"
+            columns: ["setor_id"]
+            isOneToOne: false
+            referencedRelation: "setores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cargos: {
         Row: {
@@ -57,51 +116,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "cargos_setor_id_fkey"
-            columns: ["setor_id"]
-            isOneToOne: false
-            referencedRelation: "setores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      colaboradores: {
-        Row: {
-          cargo_id: string
-          criado_em: string
-          id: string
-          nome: string
-          setor_id: string
-          user_id: string
-          foto_url: string | null
-        }
-        Insert: {
-          cargo_id: string
-          criado_em?: string
-          id?: string
-          nome: string
-          setor_id: string
-          user_id: string
-          foto_url?: string | null
-        }
-        Update: {
-          cargo_id?: string
-          criado_em?: string
-          id?: string
-          nome?: string
-          setor_id?: string
-          user_id?: string
-          foto_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "colaboradores_cargo_id_fkey"
-            columns: ["cargo_id"]
-            isOneToOne: false
-            referencedRelation: "cargos"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "colaboradores_setor_id_fkey"
             columns: ["setor_id"]
             isOneToOne: false
             referencedRelation: "setores"
@@ -145,7 +159,205 @@ export type Database = {
             referencedRelation: "colaboradores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "checkins_sentimento_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "perfil_colaborador"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      colaboradores: {
+        Row: {
+          cargo_id: string
+          criado_em: string
+          foto_url: string | null
+          id: string
+          nome: string
+          setor_id: string
+          user_id: string
+        }
+        Insert: {
+          cargo_id: string
+          criado_em?: string
+          foto_url?: string | null
+          id?: string
+          nome: string
+          setor_id: string
+          user_id: string
+        }
+        Update: {
+          cargo_id?: string
+          criado_em?: string
+          foto_url?: string | null
+          id?: string
+          nome?: string
+          setor_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "colaboradores_cargo_id_fkey"
+            columns: ["cargo_id"]
+            isOneToOne: false
+            referencedRelation: "cargos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "colaboradores_setor_id_fkey"
+            columns: ["setor_id"]
+            isOneToOne: false
+            referencedRelation: "setores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fatores_psicossociais: {
+        Row: {
+          criado_em: string
+          id: string
+          nome: string
+          ordem: number
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          nome: string
+          ordem: number
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          nome?: string
+          ordem?: number
+        }
+        Relationships: []
+      }
+      pdi_objetivos: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          descricao: string
+          id: string
+          plano_id: string
+          prazo: string | null
+          status: string
+          titulo: string
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          descricao?: string
+          id?: string
+          plano_id: string
+          prazo?: string | null
+          status?: string
+          titulo: string
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          descricao?: string
+          id?: string
+          plano_id?: string
+          prazo?: string | null
+          status?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdi_objetivos_plano_id_fkey"
+            columns: ["plano_id"]
+            isOneToOne: false
+            referencedRelation: "planos_desenvolvimento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      perguntas_psicossociais: {
+        Row: {
+          avaliacao_id: string
+          criado_em: string
+          fator_id: string
+          id: string
+          obrigatoria: boolean
+          opcoes: Json | null
+          ordem: number
+          texto: string
+          tipo_resposta: string
+        }
+        Insert: {
+          avaliacao_id: string
+          criado_em?: string
+          fator_id: string
+          id?: string
+          obrigatoria?: boolean
+          opcoes?: Json | null
+          ordem?: number
+          texto: string
+          tipo_resposta?: string
+        }
+        Update: {
+          avaliacao_id?: string
+          criado_em?: string
+          fator_id?: string
+          id?: string
+          obrigatoria?: boolean
+          opcoes?: Json | null
+          ordem?: number
+          texto?: string
+          tipo_resposta?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perguntas_psicossociais_avaliacao_id_fkey"
+            columns: ["avaliacao_id"]
+            isOneToOne: false
+            referencedRelation: "avaliacoes_psicossociais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "perguntas_psicossociais_fator_id_fkey"
+            columns: ["fator_id"]
+            isOneToOne: false
+            referencedRelation: "fatores_psicossociais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pesquisas_satisfacao: {
+        Row: {
+          anonima: boolean
+          criado_em: string
+          criado_por: string
+          descricao: string
+          id: string
+          prazo: string
+          tipo: string
+          titulo: string
+        }
+        Insert: {
+          anonima?: boolean
+          criado_em?: string
+          criado_por?: string
+          descricao: string
+          id?: string
+          prazo: string
+          tipo?: string
+          titulo: string
+        }
+        Update: {
+          anonima?: boolean
+          criado_em?: string
+          criado_por?: string
+          descricao?: string
+          id?: string
+          prazo?: string
+          tipo?: string
+          titulo?: string
+        }
+        Relationships: []
       }
       planos_desenvolvimento: {
         Row: {
@@ -189,81 +401,115 @@ export type Database = {
             referencedRelation: "colaboradores"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      pdi_objetivos: {
-        Row: {
-          atualizado_em: string
-          criado_em: string
-          descricao: string
-          id: string
-          plano_id: string
-          prazo: string | null
-          status: string
-          titulo: string
-        }
-        Insert: {
-          atualizado_em?: string
-          criado_em?: string
-          descricao?: string
-          id?: string
-          plano_id: string
-          prazo?: string | null
-          status?: string
-          titulo: string
-        }
-        Update: {
-          atualizado_em?: string
-          criado_em?: string
-          descricao?: string
-          id?: string
-          plano_id?: string
-          prazo?: string | null
-          status?: string
-          titulo?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "pdi_objetivos_plano_id_fkey"
-            columns: ["plano_id"]
+            foreignKeyName: "planos_desenvolvimento_colaborador_id_fkey"
+            columns: ["colaborador_id"]
             isOneToOne: false
-            referencedRelation: "planos_desenvolvimento"
+            referencedRelation: "perfil_colaborador"
             referencedColumns: ["id"]
           },
         ]
       }
-      pesquisas_satisfacao: {
+      respostas_psicossociais: {
         Row: {
-          anonima: boolean
-          criado_em: string
-          criado_por: string
-          descricao: string
+          colaborador_id: string
           id: string
-          prazo: string
-          tipo: string
-          titulo: string
+          pergunta_id: string
+          respondido_em: string
+          resposta: Json
         }
         Insert: {
-          anonima?: boolean
-          criado_em?: string
-          criado_por?: string
-          descricao: string
+          colaborador_id: string
           id?: string
-          prazo: string
-          tipo?: string
-          titulo: string
+          pergunta_id: string
+          respondido_em?: string
+          resposta: Json
         }
         Update: {
-          anonima?: boolean
-          criado_em?: string
-          criado_por?: string
-          descricao?: string
+          colaborador_id?: string
           id?: string
-          prazo?: string
-          tipo?: string
-          titulo?: string
+          pergunta_id?: string
+          respondido_em?: string
+          resposta?: Json
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "respostas_psicossociais_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "respostas_psicossociais_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "perfil_colaborador"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "respostas_psicossociais_pergunta_id_fkey"
+            columns: ["pergunta_id"]
+            isOneToOne: false
+            referencedRelation: "perguntas_psicossociais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resultados_psicossociais: {
+        Row: {
+          avaliacao_id: string
+          calculado_em: string
+          distribuicao: Json
+          fator_id: string
+          id: string
+          media: number | null
+          setor_id: string | null
+          total_respostas: number
+        }
+        Insert: {
+          avaliacao_id: string
+          calculado_em?: string
+          distribuicao?: Json
+          fator_id: string
+          id?: string
+          media?: number | null
+          setor_id?: string | null
+          total_respostas?: number
+        }
+        Update: {
+          avaliacao_id?: string
+          calculado_em?: string
+          distribuicao?: Json
+          fator_id?: string
+          id?: string
+          media?: number | null
+          setor_id?: string | null
+          total_respostas?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resultados_psicossociais_avaliacao_id_fkey"
+            columns: ["avaliacao_id"]
+            isOneToOne: false
+            referencedRelation: "avaliacoes_psicossociais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resultados_psicossociais_fator_id_fkey"
+            columns: ["fator_id"]
+            isOneToOne: false
+            referencedRelation: "fatores_psicossociais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resultados_psicossociais_setor_id_fkey"
+            columns: ["setor_id"]
+            isOneToOne: false
+            referencedRelation: "setores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reunioes_1a1: {
         Row: {
@@ -314,10 +560,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reunioes_1a1_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "perfil_colaborador"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reunioes_1a1_organizador_id_fkey"
             columns: ["organizador_id"]
             isOneToOne: false
             referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reunioes_1a1_organizador_id_fkey"
+            columns: ["organizador_id"]
+            isOneToOne: false
+            referencedRelation: "perfil_colaborador"
             referencedColumns: ["id"]
           },
         ]
@@ -350,6 +610,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      setores: {
+        Row: {
+          criado_em: string
+          id: string
+          nome: string
+          sigla: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          nome: string
+          sigla: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          nome?: string
+          sigla?: string
+        }
+        Relationships: []
       }
       vagas: {
         Row: {
@@ -400,51 +681,63 @@ export type Database = {
     Views: {
       perfil_colaborador: {
         Row: {
-          cargo: string
-          cargo_id: string
-          id: string
-          nome: string
-          setor: string
-          setor_id: string
-          setor_sigla: string
-          user_id: string
+          cargo: string | null
+          cargo_id: string | null
+          id: string | null
+          nome: string | null
+          setor: string | null
+          setor_id: string | null
+          setor_sigla: string | null
+          user_id: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "colaboradores_cargo_id_fkey"
+            columns: ["cargo_id"]
+            isOneToOne: false
+            referencedRelation: "cargos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "colaboradores_setor_id_fkey"
+            columns: ["setor_id"]
+            isOneToOne: false
+            referencedRelation: "setores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
-      get_acessos_diario_comparativo: {
-        Args: { p_user_id: string };
-        Returns: Json;
-      };
-      obter_checkin_sentimento_do_dia: {
-        Args: Record<PropertyKey, never>;
-        Returns: Json;
-      };
-      registrar_checkin_sentimento: {
-        Args: { p_colaborador_id: string; p_emocao: string; p_motivo?: string };
-        Returns: void;
-      };
-      registrar_acesso_diario: {
-        Args: { p_colaborador_id: string };
-        Returns: void;
-      };
-      listar_equipe_colaborador: {
-        Args: Record<PropertyKey, never>;
-        Returns: {
-          id: string;
-          user_id: string;
-          nome: string;
-          cargo: string;
-          setor: string;
-          setor_sigla: string;
-          foto_url: string | null;
-        }[];
-      };
       colaborador_compartilha_setor: {
-        Args: { p_colaborador_id: string };
-        Returns: boolean;
-      };
+        Args: { p_colaborador_id: string }
+        Returns: boolean
+      }
+      get_acessos_diario_comparativo: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
+      listar_equipe_colaborador: {
+        Args: never
+        Returns: {
+          cargo: string
+          foto_url: string
+          id: string
+          nome: string
+          setor: string
+          setor_sigla: string
+          user_id: string
+        }[]
+      }
+      obter_checkin_sentimento_do_dia: { Args: never; Returns: Json }
+      registrar_acesso_diario: {
+        Args: { p_colaborador_id: string }
+        Returns: undefined
+      }
+      registrar_checkin_sentimento: {
+        Args: { p_colaborador_id: string; p_emocao: string; p_motivo?: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

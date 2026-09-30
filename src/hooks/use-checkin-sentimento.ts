@@ -63,7 +63,7 @@ export function useRegistrarCheckinSentimento() {
       if (!perfil) throw new Error("Perfil de colaborador não encontrado.");
 
       const { error } = await supabase.rpc("registrar_checkin_sentimento", {
-        p_colaborador_id: perfil.id,
+        p_colaborador_id: perfil.id as string,
         p_emocao: payload.emocao,
         p_motivo: payload.motivo,
       });

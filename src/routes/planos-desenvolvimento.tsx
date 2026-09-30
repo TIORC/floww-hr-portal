@@ -314,9 +314,9 @@ function PlanosDesenvolvimentoPage() {
                     <>
                       <p className="mb-1 text-xs text-muted-foreground">Você</p>
                       <div className="mb-3 flex items-center gap-3 rounded-xl border border-border p-2">
-                        <TeamAvatar name={perfil.nome} />
+                        <TeamAvatar name={perfil.nome ?? ""} />
                         <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{perfil.nome}</p><p className="truncate text-xs text-muted-foreground">{perfil.setor_sigla}</p></div>
-                        <Button type="button" size="icon" variant="outline" aria-label="Ver meu perfil" onClick={() => setSelectedMember({ id: perfil.id, user_id: perfil.user_id, nome: perfil.nome, cargo: perfil.cargo, setor: perfil.setor, setor_sigla: perfil.setor_sigla })}><Eye className="size-4" /></Button>
+                        <Button type="button" size="icon" variant="outline" aria-label="Ver meu perfil" onClick={() => setSelectedMember({ id: perfil.id ?? "", user_id: perfil.user_id ?? "", nome: perfil.nome ?? "", cargo: perfil.cargo ?? "", setor: perfil.setor ?? "", setor_sigla: perfil.setor_sigla ?? "" })}><Eye className="size-4" /></Button>
                       </div>
                     </>
                   )}
