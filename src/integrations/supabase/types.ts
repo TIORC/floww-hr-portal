@@ -213,6 +213,111 @@ export type Database = {
           },
         ]
       }
+      colaboradores_importados: {
+        Row: {
+          atualizado_em: string
+          biografia: string
+          cargo: string
+          cargo_visivel: string
+          cpf: string
+          criado_em: string
+          data_admissao: string
+          data_cadastro: string
+          data_nascimento: string
+          departamento: string
+          desligamento: string
+          email: string
+          etnia: string
+          foto_url: string | null
+          genero: string
+          gestor_direto: string
+          gestor_direto_email: string
+          grupos: string
+          id: string
+          id_planilha: string
+          idioma: string
+          matricula: string
+          nome: string
+          nome_completo: string
+          origem_cadastro: string
+          papel: string
+          participa_gamificacao: string
+          sexo: string
+          situacao: string
+          ultimo_acesso: string
+          ultimo_dia_trabalhado: string
+          unidade: string
+        }
+        Insert: {
+          atualizado_em?: string
+          biografia?: string
+          cargo?: string
+          cargo_visivel?: string
+          cpf?: string
+          criado_em?: string
+          data_admissao?: string
+          data_cadastro?: string
+          data_nascimento?: string
+          departamento?: string
+          desligamento?: string
+          email: string
+          etnia?: string
+          foto_url?: string | null
+          genero?: string
+          gestor_direto?: string
+          gestor_direto_email?: string
+          grupos?: string
+          id?: string
+          id_planilha: string
+          idioma?: string
+          matricula?: string
+          nome: string
+          nome_completo: string
+          origem_cadastro?: string
+          papel?: string
+          participa_gamificacao?: string
+          sexo?: string
+          situacao?: string
+          ultimo_acesso?: string
+          ultimo_dia_trabalhado?: string
+          unidade?: string
+        }
+        Update: {
+          atualizado_em?: string
+          biografia?: string
+          cargo?: string
+          cargo_visivel?: string
+          cpf?: string
+          criado_em?: string
+          data_admissao?: string
+          data_cadastro?: string
+          data_nascimento?: string
+          departamento?: string
+          desligamento?: string
+          email?: string
+          etnia?: string
+          foto_url?: string | null
+          genero?: string
+          gestor_direto?: string
+          gestor_direto_email?: string
+          grupos?: string
+          id?: string
+          id_planilha?: string
+          idioma?: string
+          matricula?: string
+          nome?: string
+          nome_completo?: string
+          origem_cadastro?: string
+          papel?: string
+          participa_gamificacao?: string
+          sexo?: string
+          situacao?: string
+          ultimo_acesso?: string
+          ultimo_dia_trabalhado?: string
+          unidade?: string
+        }
+        Relationships: []
+      }
       fatores_psicossociais: {
         Row: {
           criado_em: string

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AvaliacoesRouteImport } from './routes/avaliacoes'
+import { Route as CadastroDesligamentoRouteImport } from './routes/cadastro-desligamento'
 import { Route as CarregandoRouteImport } from './routes/carregando'
 import { Route as CatalogoRouteImport } from './routes/catalogo'
 import { Route as ComunicadosRouteImport } from './routes/comunicados'
@@ -41,6 +42,11 @@ const IndexRoute = IndexRouteImport.update({
 const AvaliacoesRoute = AvaliacoesRouteImport.update({
   id: '/avaliacoes',
   path: '/avaliacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CadastroDesligamentoRoute = CadastroDesligamentoRouteImport.update({
+  id: '/cadastro-desligamento',
+  path: '/cadastro-desligamento',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CarregandoRoute = CarregandoRouteImport.update({
@@ -154,6 +160,7 @@ const ShopHistoricoRoute = ShopHistoricoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/avaliacoes': typeof AvaliacoesRouteWithChildren
+  '/cadastro-desligamento': typeof CadastroDesligamentoRoute
   '/carregando': typeof CarregandoRoute
   '/catalogo': typeof CatalogoRoute
   '/comunicados': typeof ComunicadosRoute
@@ -179,6 +186,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/avaliacoes': typeof AvaliacoesRouteWithChildren
+  '/cadastro-desligamento': typeof CadastroDesligamentoRoute
   '/carregando': typeof CarregandoRoute
   '/catalogo': typeof CatalogoRoute
   '/comunicados': typeof ComunicadosRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/avaliacoes': typeof AvaliacoesRouteWithChildren
+  '/cadastro-desligamento': typeof CadastroDesligamentoRoute
   '/carregando': typeof CarregandoRoute
   '/catalogo': typeof CatalogoRoute
   '/comunicados': typeof ComunicadosRoute
@@ -232,6 +241,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/avaliacoes'
+    | '/cadastro-desligamento'
     | '/carregando'
     | '/catalogo'
     | '/comunicados'
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/avaliacoes'
+    | '/cadastro-desligamento'
     | '/carregando'
     | '/catalogo'
     | '/comunicados'
@@ -282,6 +293,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/avaliacoes'
+    | '/cadastro-desligamento'
     | '/carregando'
     | '/catalogo'
     | '/comunicados'
@@ -308,6 +320,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AvaliacoesRoute: typeof AvaliacoesRouteWithChildren
+  CadastroDesligamentoRoute: typeof CadastroDesligamentoRoute
   CarregandoRoute: typeof CarregandoRoute
   CatalogoRoute: typeof CatalogoRoute
   ComunicadosRoute: typeof ComunicadosRoute
@@ -344,6 +357,13 @@ declare module '@tanstack/react-router' {
       path: '/avaliacoes'
       fullPath: '/avaliacoes'
       preLoaderRoute: typeof AvaliacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cadastro-desligamento': {
+      id: '/cadastro-desligamento'
+      path: '/cadastro-desligamento'
+      fullPath: '/cadastro-desligamento'
+      preLoaderRoute: typeof CadastroDesligamentoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/carregando': {
@@ -511,6 +531,7 @@ const AvaliacoesRouteWithChildren = AvaliacoesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AvaliacoesRoute: AvaliacoesRouteWithChildren,
+  CadastroDesligamentoRoute: CadastroDesligamentoRoute,
   CarregandoRoute: CarregandoRoute,
   CatalogoRoute: CatalogoRoute,
   ComunicadosRoute: ComunicadosRoute,

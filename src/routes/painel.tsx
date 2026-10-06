@@ -327,7 +327,7 @@ export function Sidebar() {
               {[
                 { label: "Setores", icon: Building2, to: "/setores" },
                 { label: "Cargos & Salários", icon: BadgeDollarSign },
-                { label: "Cadastros e Desligamentos", icon: UsersRound },
+                { label: "Cadastros e Desligamentos", icon: UsersRound, to: "/cadastro-desligamento" },
               ].map(({ label, icon: Icon, to }) => (
                 <li key={label}>
                   {to ? (
