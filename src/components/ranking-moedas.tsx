@@ -5,12 +5,7 @@ import { getIniciais } from "@/lib/iniciais";
 import { usePerfil } from "@/hooks/use-perfil";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  MINHAS_MOEDAS,
-  RANKING_COLABORADORES,
-  RANKING_GESTORES,
-  type EntradaRanking,
-} from "@/lib/ranking-mock";
+import { RANKING_COLABORADORES, RANKING_GESTORES, type EntradaRanking } from "@/lib/ranking-mock";
 
 const TITULO_RANKING = "ranking-moedas-titulo";
 
@@ -18,7 +13,7 @@ function formatarMoedas(valor: number) {
   return valor.toLocaleString("pt-BR");
 }
 
-function CabecalhoMinhasMoedas() {
+function CabecalhoMinhasMoedas({ saldo }: { saldo: number }) {
   const { data: perfil, isPending } = usePerfil();
 
   const nome = perfil?.nome ?? "Colaborador";
@@ -43,7 +38,7 @@ function CabecalhoMinhasMoedas() {
       <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2">
         <Coins className="size-4 shrink-0 text-accent-gold" aria-hidden />
         <span className="font-display text-base font-bold text-foreground">
-          {formatarMoedas(MINHAS_MOEDAS)}
+          {formatarMoedas(saldo)}
         </span>
         <span className="text-xs font-semibold text-muted-foreground">Floww Coins</span>
       </div>
@@ -95,9 +90,9 @@ function ListaRanking({ dados }: { dados: EntradaRanking[] }) {
   );
 }
 
-export function RankingMoedas() {
+export function RankingMoedas({ saldo }: { saldo: number }) {
   return (
-    <section aria-labelledby={TITULO_RANKING} className="mt-8 w-full max-w-[800px]">
+    <section aria-labelledby={TITULO_RANKING} className="w-full max-w-[800px]">
       <h2
         id={TITULO_RANKING}
         className="ml-8 font-display text-xl font-semibold text-muted-foreground"
@@ -106,7 +101,7 @@ export function RankingMoedas() {
       </h2>
 
       <div className="mt-4 rounded-2xl bg-accent-soft p-6">
-        <CabecalhoMinhasMoedas />
+        <CabecalhoMinhasMoedas saldo={saldo} />
 
         <Tabs defaultValue="colaboradores" className="mt-5">
           <TabsList className="grid w-full grid-cols-2 bg-background sm:w-96">

@@ -25,25 +25,13 @@ const ATIVIDADES = [
 ] as const;
 
 const COMPETENCIAS = [
-  { id: "foco", rotulo: "Foco", valor: 70, cor: "bg-destructive" },
-  { id: "colaboracao", rotulo: "Colaboração", valor: 50, cor: "bg-accent-yellow" },
-  { id: "desenvolvimento", rotulo: "Desenvolvimento", valor: 20, cor: "bg-brand" },
-  { id: "iniciativa", rotulo: "Iniciativa", valor: 60, cor: "bg-accent-orange" },
+  { id: "proatividade-autonomia", rotulo: "Proatividade e Autonomia", valor: 70, cor: "bg-destructive" },
+  { id: "confiabilidade-transparencia", rotulo: "Confiabilidade e Transparência", valor: 50, cor: "bg-accent-yellow" },
+  { id: "encantamento-cliente", rotulo: "Encantamento e Foco no Cliente", valor: 20, cor: "bg-brand" },
+  { id: "responsabilidade-produtividade", rotulo: "Responsabilidade e Produtividade", valor: 60, cor: "bg-accent-orange" },
 ] as const;
 
-const MEDIA_CONSTANCIA = Math.round(
-  COMPETENCIAS.reduce((soma, competencia) => soma + competencia.valor, 0) / COMPETENCIAS.length,
-);
-
-const BARRA = [
-  ...COMPETENCIAS,
-  {
-    id: "resultados",
-    rotulo: "Resultados",
-    valor: MEDIA_CONSTANCIA,
-    cor: "bg-accent-green",
-  },
-] as const;
+const BARRA = [...COMPETENCIAS] as const;
 
 const TITULO_ATIVIDADES = "atividades-painel-titulo";
 
@@ -149,8 +137,8 @@ function BarraProgresso({ rotulo, valor, cor }: { rotulo: string; valor: number;
   return (
     <div>
       <div className="flex items-baseline justify-between gap-2">
-        <span className="text-[0.65rem] font-semibold text-foreground">{rotulo}</span>
-        <span className="text-[0.65rem] font-bold text-muted-foreground">{valor}%</span>
+        <span className="min-w-0 flex-1 text-[0.65rem] font-semibold leading-tight text-foreground">{rotulo}</span>
+        <span className="shrink-0 text-[0.65rem] font-bold text-muted-foreground">{valor}%</span>
       </div>
       <div
         role="progressbar"

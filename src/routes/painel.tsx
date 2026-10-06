@@ -1,11 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
+  Building2,
   CalendarClock,
   ChevronRight,
   ClipboardCheck,
+  ClipboardList,
   BriefcaseBusiness,
   BadgeDollarSign,
+  History,
   MessageCircle,
   X,
   FileSearch,
@@ -15,17 +18,22 @@ import {
   SearchCheck,
   Settings,
   ShieldAlert,
+  ShoppingBag,
   Smile,
   Sparkles,
   TrendingUp,
+  UserMinus,
   UserSearch,
   UsersRound,
+  Zap,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PerfilFlutuante } from "@/components/perfil-flutuante";
 import { IndicadoresPainel } from "@/components/indicadores-painel";
 import { CheckinSentimento } from "@/components/checkin-sentimento";
 import { RankingMoedas } from "@/components/ranking-moedas";
+import { FlowwShop } from "@/components/floww-shop";
+import { MINHAS_MOEDAS } from "@/lib/ranking-mock";
 import { usePerfil } from "@/hooks/use-perfil";
 import { useRegistrarAcesso } from "@/hooks/use-acessos-diarios";
 import { montarSaudacao } from "@/lib/greeting";
@@ -116,7 +124,7 @@ export function Sidebar() {
               <span className="flex-1">Desempenho &amp; Evolução</span>
               <ChevronRight className="size-4 shrink-0" aria-hidden />
             </button>
-            <ul className="absolute left-full top-0 z-20 ml-2 hidden w-56 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
+            <div className="absolute left-full top-0 z-20 hidden pl-2 group-hover:block group-focus-within:block"><ul className="relative w-56 grid rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl before:absolute before:-left-2 before:top-0 before:h-full before:w-2 before:content-['']">
               {[
                 { label: "Avaliações", icon: ClipboardCheck, to: "/avaliacoes" },
                 { label: "Feedback's", icon: MessageSquareText, to: "/feedbacks" },
@@ -145,6 +153,7 @@ export function Sidebar() {
                 </li>
               ))}
             </ul>
+          </div>
           </li>
           <li className="group relative">
             <button
@@ -156,7 +165,7 @@ export function Sidebar() {
               <span className="flex-1">Clima e Engajamento</span>
               <ChevronRight className="size-4 shrink-0" aria-hidden />
             </button>
-            <ul className="absolute left-full top-0 z-20 ml-2 hidden w-56 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
+            <div className="absolute left-full top-0 z-20 hidden pl-2 group-hover:block group-focus-within:block"><ul className="relative w-56 grid rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl before:absolute before:-left-2 before:top-0 before:h-full before:w-2 before:content-['']">
               {[
                 { label: "Comunicados", icon: Megaphone, to: "/comunicados" },
                 { label: "Gamificação", icon: Sparkles, to: "/gamificacao" },
@@ -179,6 +188,42 @@ export function Sidebar() {
                 </li>
               ))}
             </ul>
+          </div>
+          </li>
+          <li className="group relative">
+            <button
+              type="button"
+              aria-haspopup="true"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-white/70 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            >
+              <ShoppingBag className="size-4 shrink-0" aria-hidden />
+              <span className="flex-1">Shop</span>
+              <ChevronRight className="size-4 shrink-0" aria-hidden />
+            </button>
+            <div className="absolute left-full top-0 z-20 hidden pl-2 group-hover:block group-focus-within:block"><ul className="relative w-56 grid rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl before:absolute before:-left-2 before:top-0 before:h-full before:w-2 before:content-['']">
+              {[
+                { label: "Catálogo", icon: ShoppingBag, to: "/catalogo" },
+                { label: "Histórico", icon: History, to: "/shop/historico" },
+              ].map(({ label, icon: Icon, to }) => (
+                <li key={label}>
+                  {to ? (
+                    <Link
+                      to={to}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white"
+                    >
+                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                      {label}
+                    </Link>
+                  ) : (
+                    <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
+                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                      {label}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
           </li>
         </ul>
         <p className="mt-7 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-white/45">
@@ -195,9 +240,17 @@ export function Sidebar() {
               <span className="flex-1">Relatórios e Pesquisas</span>
               <ChevronRight className="size-4 shrink-0" aria-hidden />
             </button>
-            <ul className="absolute left-full top-0 z-20 ml-2 hidden w-64 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
+            <div className="absolute left-full top-0 z-20 hidden pl-2 group-hover:block group-focus-within:block"><ul className="relative w-64 grid rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl before:absolute before:-left-2 before:top-0 before:h-full before:w-2 before:content-['']">
               {[
-                { label: "Todas as Pesquisas", icon: Smile, to: "/todas-as-pesquisas" },
+                { label: "Pesquisa de Satisfação", icon: Smile, to: "/pesquisa-satisfacao" },
+                { label: "Pesquisa Rápida", icon: Zap, to: "/pesquisa-rapida" },
+                { label: "Super Pesquisa", icon: ClipboardList, to: "/super-pesquisa" },
+                { label: "Pesquisa de Engajamento", icon: UsersRound, to: "/pesquisa-engajamento" },
+                {
+                  label: "Pesquisa de Desligamento",
+                  icon: UserMinus,
+                  to: "/pesquisa-desligamento",
+                },
                 {
                   label: "Mapeamento de Riscos Psicossociais",
                   icon: ShieldAlert,
@@ -222,6 +275,7 @@ export function Sidebar() {
                 </li>
               ))}
             </ul>
+          </div>
           </li>
           <li className="group relative">
             <button
@@ -233,7 +287,7 @@ export function Sidebar() {
               <span className="flex-1">Recrutamento &amp; Seleção</span>
               <ChevronRight className="size-4 shrink-0" aria-hidden />
             </button>
-            <ul className="absolute left-full top-0 z-20 ml-2 hidden w-56 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
+            <div className="absolute left-full top-0 z-20 hidden pl-2 group-hover:block group-focus-within:block"><ul className="relative w-56 grid rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl before:absolute before:-left-2 before:top-0 before:h-full before:w-2 before:content-['']">
               {[
                 { label: "Vagas", icon: BriefcaseBusiness, to: "/vagas" },
                 { label: "Processos Seletivos", icon: UserSearch, to: "/processos-seletivos" },
@@ -257,6 +311,7 @@ export function Sidebar() {
                 </li>
               ))}
             </ul>
+          </div>
           </li>
           <li className="group relative">
             <button
@@ -268,19 +323,31 @@ export function Sidebar() {
               <span className="flex-1">Configurações</span>
               <ChevronRight className="size-4 shrink-0" aria-hidden />
             </button>
-            <ul className="absolute left-full top-0 z-20 ml-2 hidden w-72 rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl group-hover:grid group-focus-within:grid">
+            <div className="absolute left-full top-0 z-20 hidden pl-2 group-hover:block group-focus-within:block"><ul className="relative w-72 grid rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl before:absolute before:-left-2 before:top-0 before:h-full before:w-2 before:content-['']">
               {[
+                { label: "Setores", icon: Building2, to: "/setores" },
                 { label: "Cargos & Salários", icon: BadgeDollarSign },
                 { label: "Cadastros e Desligamentos", icon: UsersRound },
-              ].map(({ label, icon: Icon }) => (
+              ].map(({ label, icon: Icon, to }) => (
                 <li key={label}>
-                  <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
-                    <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
-                    {label}
-                  </span>
+                  {to ? (
+                    <Link
+                      to={to}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white"
+                    >
+                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                      {label}
+                    </Link>
+                  ) : (
+                    <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80">
+                      <Icon className="size-4 shrink-0 text-white/65" aria-hidden />
+                      {label}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
+          </div>
           </li>
         </ul>
       </nav>
@@ -325,6 +392,7 @@ function Painel() {
   const [chatAberto, setChatAberto] = useState(false);
   const [balloonMessageIndex, setBalloonMessageIndex] = useState(0);
   const [boasVindasAberto, setBoasVindasAberto] = useState(false);
+  const [saldoMoedas, setSaldoMoedas] = useState(MINHAS_MOEDAS);
   const { mutate: registrarAcesso } = useRegistrarAcesso();
 
   useEffect(() => {
@@ -370,7 +438,13 @@ function Painel() {
         <Saudacao />
         <IndicadoresPainel />
         <CheckinSentimento />
-        <RankingMoedas />
+        <div className="mt-8 grid w-full gap-8 lg:grid-cols-[minmax(0,800px)_minmax(0,1fr)] lg:items-start">
+          <RankingMoedas saldo={saldoMoedas} />
+          <FlowwShop
+            saldo={saldoMoedas}
+            aoConfirmarResgate={(valor) => setSaldoMoedas((atual) => atual - valor)}
+          />
+        </div>
         <BoasVindasFlafy aberto={boasVindasAberto} onFechar={() => setBoasVindasAberto(false)} />
       </main>
       <div

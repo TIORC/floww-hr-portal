@@ -4,13 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
-import {
-  EMOCOES_SENTIMENTO,
-  LIMITE_MOTIVO,
-  getEmocaoSentimento,
-  isEmocaoSentimento,
-  type EmocaoSentimento,
-} from "@/lib/sentimento";
+import { LIMITE_MOTIVO, EMOCOES_SENTIMENTO, getEmocaoSentimento, isEmocaoSentimento, type EmocaoSentimento } from "@/lib/sentimento";
 import {
   CHECKIN_SENTIMENTO_QUERY_KEY,
   useCheckinDoDia,
@@ -19,14 +13,10 @@ import {
 } from "@/hooks/use-checkin-sentimento";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 
 const TITULO_CHECKIN = "checkin-sentimento-titulo";
 const ID_MOTIVO = "checkin-sentimento-motivo";
-
-const ITEM_EMOCAO =
-  "relative flex h-auto aspect-auto w-full shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-border bg-background p-4 transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=checked]:border-brand data-[state=checked]:bg-brand/5 [&>span:has(svg)]:hidden";
 
 function ArteEmocao({
   emocao,
@@ -92,32 +82,39 @@ function SeletorEmocoes({
   desabilitado: boolean;
 }) {
   return (
-    <RadioGroup
-      value={valor ?? ""}
-      onValueChange={(proximo) => {
-        if (isEmocaoSentimento(proximo)) onChange(proximo);
-      }}
-      disabled={desabilitado}
+    <div
+      role="radiogroup"
       aria-labelledby={TITULO_CHECKIN}
-      className="mx-auto grid w-full max-w-5xl grid-cols-5 items-end gap-3 sm:gap-5"
+      className="mx-auto grid w-full max-w-[51.2rem] grid-cols-5 items-end gap-[0.6rem] sm:gap-4"
     >
-      {EMOCOES_SENTIMENTO.map((emocao) => (
-        <RadioGroupItem
-          key={emocao.id}
-          value={emocao.id}
-          className={ITEM_EMOCAO}
-          aria-label={emocao.rotulo}
-          title={emocao.rotulo}
-        >
-          <span
-            aria-hidden="true"
-            className="relative z-10 text-6xl leading-none sm:text-7xl"
+      {EMOCOES_SENTIMENTO.map((emocao) => {
+        const selecionado = valor === emocao.id;
+        return (
+          <button
+            key={emocao.id}
+            type="button"
+            role="radio"
+            aria-checked={selecionado}
+            aria-label={emocao.rotulo}
+            title={emocao.rotulo}
+            disabled={desabilitado}
+            onClick={() => onChange(emocao.id)}
+            className={cn(
+              "group flex aspect-square w-full items-center justify-center rounded-2xl border-2 bg-background p-3 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
+              selecionado
+                ? "scale-105 border-brand bg-brand/5 shadow-lg"
+                : "border-border hover:-translate-y-1.5 hover:scale-110 hover:border-brand/60 hover:bg-muted/50 hover:shadow-xl active:scale-95",
+            )}
           >
-            {emocao.emoji}
-          </span>
-        </RadioGroupItem>
-      ))}
-    </RadioGroup>
+            <ArteEmocao
+              emocao={emocao}
+              imgClassName="h-auto w-full max-w-[4.8rem] object-contain transition-transform duration-200 group-hover:scale-110 group-hover:-rotate-3 sm:max-w-[5.6rem]"
+              emojiClassName="text-5xl leading-none transition-transform duration-200 group-hover:scale-110 sm:text-6xl"
+            />
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -266,7 +263,7 @@ export function CheckinSentimento() {
   function enviar(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!emocao) {
+    if (!emocao || !isEmocaoSentimento(emocao)) {
       toast.error("Escolha como você está se sentindo para enviar.");
       return;
     }

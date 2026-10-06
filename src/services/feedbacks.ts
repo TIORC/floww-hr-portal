@@ -146,9 +146,9 @@ export function fetchFeedbackMetrics(startDate: string, endDate: string) {
     const sent = recordsFor("sent", startDate, endDate);
     const categories = [
       ["Proatividade e Autonomia", "proatividade"],
+      ["Confiabilidade e Transparência", "transparencia"],
       ["Encantamento e Foco no Cliente", "cliente"],
       ["Responsabilidade e Produtividade", "responsabilidade"],
-      ["Confiabilidade e Transparência", "transparencia"],
     ] as const;
     const radarData = categories.map(([category, key]) => {
       const scores = received

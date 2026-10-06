@@ -12,18 +12,26 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AvaliacoesRouteImport } from './routes/avaliacoes'
 import { Route as CarregandoRouteImport } from './routes/carregando'
+import { Route as CatalogoRouteImport } from './routes/catalogo'
 import { Route as ComunicadosRouteImport } from './routes/comunicados'
 import { Route as FeedbacksRouteImport } from './routes/feedbacks'
 import { Route as GamificacaoRouteImport } from './routes/gamificacao'
 import { Route as MapeamentoRiscosPsicossociaisRouteImport } from './routes/mapeamento-riscos-psicossociais'
 import { Route as PainelRouteImport } from './routes/painel'
+import { Route as PesquisaDesligamentoRouteImport } from './routes/pesquisa-desligamento'
+import { Route as PesquisaEngajamentoRouteImport } from './routes/pesquisa-engajamento'
+import { Route as PesquisaRapidaRouteImport } from './routes/pesquisa-rapida'
+import { Route as PesquisaSatisfacaoRouteImport } from './routes/pesquisa-satisfacao'
 import { Route as PlanosDesenvolvimentoRouteImport } from './routes/planos-desenvolvimento'
 import { Route as ProcessosSeletivosRouteImport } from './routes/processos-seletivos'
 import { Route as Reunioes11RouteImport } from './routes/reunioes-1-1'
+import { Route as SetoresRouteImport } from './routes/setores'
+import { Route as SuperPesquisaRouteImport } from './routes/super-pesquisa'
 import { Route as TodasAsPesquisasRouteImport } from './routes/todas-as-pesquisas'
 import { Route as VagasRouteImport } from './routes/vagas'
 import { Route as AvaliacoesAutoavaliacoesRouteImport } from './routes/avaliacoes.autoavaliacoes'
 import { Route as CandidaturaVagaIdRouteImport } from './routes/candidatura.$vagaId'
+import { Route as ShopHistoricoRouteImport } from './routes/shop.historico'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -38,6 +46,11 @@ const AvaliacoesRoute = AvaliacoesRouteImport.update({
 const CarregandoRoute = CarregandoRouteImport.update({
   id: '/carregando',
   path: '/carregando',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogoRoute = CatalogoRouteImport.update({
+  id: '/catalogo',
+  path: '/catalogo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComunicadosRoute = ComunicadosRouteImport.update({
@@ -66,6 +79,26 @@ const PainelRoute = PainelRouteImport.update({
   path: '/painel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PesquisaDesligamentoRoute = PesquisaDesligamentoRouteImport.update({
+  id: '/pesquisa-desligamento',
+  path: '/pesquisa-desligamento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PesquisaEngajamentoRoute = PesquisaEngajamentoRouteImport.update({
+  id: '/pesquisa-engajamento',
+  path: '/pesquisa-engajamento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PesquisaRapidaRoute = PesquisaRapidaRouteImport.update({
+  id: '/pesquisa-rapida',
+  path: '/pesquisa-rapida',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PesquisaSatisfacaoRoute = PesquisaSatisfacaoRouteImport.update({
+  id: '/pesquisa-satisfacao',
+  path: '/pesquisa-satisfacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlanosDesenvolvimentoRoute = PlanosDesenvolvimentoRouteImport.update({
   id: '/planos-desenvolvimento',
   path: '/planos-desenvolvimento',
@@ -79,6 +112,16 @@ const ProcessosSeletivosRoute = ProcessosSeletivosRouteImport.update({
 const Reunioes11Route = Reunioes11RouteImport.update({
   id: '/reunioes-1-1',
   path: '/reunioes-1-1',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetoresRoute = SetoresRouteImport.update({
+  id: '/setores',
+  path: '/setores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuperPesquisaRoute = SuperPesquisaRouteImport.update({
+  id: '/super-pesquisa',
+  path: '/super-pesquisa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TodasAsPesquisasRoute = TodasAsPesquisasRouteImport.update({
@@ -102,58 +145,87 @@ const CandidaturaVagaIdRoute = CandidaturaVagaIdRouteImport.update({
   path: '/candidatura/$vagaId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShopHistoricoRoute = ShopHistoricoRouteImport.update({
+  id: '/shop/historico',
+  path: '/shop/historico',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/avaliacoes': typeof AvaliacoesRouteWithChildren
   '/carregando': typeof CarregandoRoute
+  '/catalogo': typeof CatalogoRoute
   '/comunicados': typeof ComunicadosRoute
   '/feedbacks': typeof FeedbacksRoute
   '/gamificacao': typeof GamificacaoRoute
   '/mapeamento-riscos-psicossociais': typeof MapeamentoRiscosPsicossociaisRoute
   '/painel': typeof PainelRoute
+  '/pesquisa-desligamento': typeof PesquisaDesligamentoRoute
+  '/pesquisa-engajamento': typeof PesquisaEngajamentoRoute
+  '/pesquisa-rapida': typeof PesquisaRapidaRoute
+  '/pesquisa-satisfacao': typeof PesquisaSatisfacaoRoute
   '/planos-desenvolvimento': typeof PlanosDesenvolvimentoRoute
   '/processos-seletivos': typeof ProcessosSeletivosRoute
   '/reunioes-1-1': typeof Reunioes11Route
+  '/setores': typeof SetoresRoute
+  '/super-pesquisa': typeof SuperPesquisaRoute
   '/todas-as-pesquisas': typeof TodasAsPesquisasRoute
   '/vagas': typeof VagasRoute
   '/avaliacoes/autoavaliacoes': typeof AvaliacoesAutoavaliacoesRoute
   '/candidatura/$vagaId': typeof CandidaturaVagaIdRoute
+  '/shop/historico': typeof ShopHistoricoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/avaliacoes': typeof AvaliacoesRouteWithChildren
   '/carregando': typeof CarregandoRoute
+  '/catalogo': typeof CatalogoRoute
   '/comunicados': typeof ComunicadosRoute
   '/feedbacks': typeof FeedbacksRoute
   '/gamificacao': typeof GamificacaoRoute
   '/mapeamento-riscos-psicossociais': typeof MapeamentoRiscosPsicossociaisRoute
   '/painel': typeof PainelRoute
+  '/pesquisa-desligamento': typeof PesquisaDesligamentoRoute
+  '/pesquisa-engajamento': typeof PesquisaEngajamentoRoute
+  '/pesquisa-rapida': typeof PesquisaRapidaRoute
+  '/pesquisa-satisfacao': typeof PesquisaSatisfacaoRoute
   '/planos-desenvolvimento': typeof PlanosDesenvolvimentoRoute
   '/processos-seletivos': typeof ProcessosSeletivosRoute
   '/reunioes-1-1': typeof Reunioes11Route
+  '/setores': typeof SetoresRoute
+  '/super-pesquisa': typeof SuperPesquisaRoute
   '/todas-as-pesquisas': typeof TodasAsPesquisasRoute
   '/vagas': typeof VagasRoute
   '/avaliacoes/autoavaliacoes': typeof AvaliacoesAutoavaliacoesRoute
   '/candidatura/$vagaId': typeof CandidaturaVagaIdRoute
+  '/shop/historico': typeof ShopHistoricoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/avaliacoes': typeof AvaliacoesRouteWithChildren
   '/carregando': typeof CarregandoRoute
+  '/catalogo': typeof CatalogoRoute
   '/comunicados': typeof ComunicadosRoute
   '/feedbacks': typeof FeedbacksRoute
   '/gamificacao': typeof GamificacaoRoute
   '/mapeamento-riscos-psicossociais': typeof MapeamentoRiscosPsicossociaisRoute
   '/painel': typeof PainelRoute
+  '/pesquisa-desligamento': typeof PesquisaDesligamentoRoute
+  '/pesquisa-engajamento': typeof PesquisaEngajamentoRoute
+  '/pesquisa-rapida': typeof PesquisaRapidaRoute
+  '/pesquisa-satisfacao': typeof PesquisaSatisfacaoRoute
   '/planos-desenvolvimento': typeof PlanosDesenvolvimentoRoute
   '/processos-seletivos': typeof ProcessosSeletivosRoute
   '/reunioes-1-1': typeof Reunioes11Route
+  '/setores': typeof SetoresRoute
+  '/super-pesquisa': typeof SuperPesquisaRoute
   '/todas-as-pesquisas': typeof TodasAsPesquisasRoute
   '/vagas': typeof VagasRoute
   '/avaliacoes/autoavaliacoes': typeof AvaliacoesAutoavaliacoesRoute
   '/candidatura/$vagaId': typeof CandidaturaVagaIdRoute
+  '/shop/historico': typeof ShopHistoricoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,69 +233,101 @@ export interface FileRouteTypes {
     | '/'
     | '/avaliacoes'
     | '/carregando'
+    | '/catalogo'
     | '/comunicados'
     | '/feedbacks'
     | '/gamificacao'
     | '/mapeamento-riscos-psicossociais'
     | '/painel'
+    | '/pesquisa-desligamento'
+    | '/pesquisa-engajamento'
+    | '/pesquisa-rapida'
+    | '/pesquisa-satisfacao'
     | '/planos-desenvolvimento'
     | '/processos-seletivos'
     | '/reunioes-1-1'
+    | '/setores'
+    | '/super-pesquisa'
     | '/todas-as-pesquisas'
     | '/vagas'
     | '/avaliacoes/autoavaliacoes'
     | '/candidatura/$vagaId'
+    | '/shop/historico'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/avaliacoes'
     | '/carregando'
+    | '/catalogo'
     | '/comunicados'
     | '/feedbacks'
     | '/gamificacao'
     | '/mapeamento-riscos-psicossociais'
     | '/painel'
+    | '/pesquisa-desligamento'
+    | '/pesquisa-engajamento'
+    | '/pesquisa-rapida'
+    | '/pesquisa-satisfacao'
     | '/planos-desenvolvimento'
     | '/processos-seletivos'
     | '/reunioes-1-1'
+    | '/setores'
+    | '/super-pesquisa'
     | '/todas-as-pesquisas'
     | '/vagas'
     | '/avaliacoes/autoavaliacoes'
     | '/candidatura/$vagaId'
+    | '/shop/historico'
   id:
     | '__root__'
     | '/'
     | '/avaliacoes'
     | '/carregando'
+    | '/catalogo'
     | '/comunicados'
     | '/feedbacks'
     | '/gamificacao'
     | '/mapeamento-riscos-psicossociais'
     | '/painel'
+    | '/pesquisa-desligamento'
+    | '/pesquisa-engajamento'
+    | '/pesquisa-rapida'
+    | '/pesquisa-satisfacao'
     | '/planos-desenvolvimento'
     | '/processos-seletivos'
     | '/reunioes-1-1'
+    | '/setores'
+    | '/super-pesquisa'
     | '/todas-as-pesquisas'
     | '/vagas'
     | '/avaliacoes/autoavaliacoes'
     | '/candidatura/$vagaId'
+    | '/shop/historico'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AvaliacoesRoute: typeof AvaliacoesRouteWithChildren
   CarregandoRoute: typeof CarregandoRoute
+  CatalogoRoute: typeof CatalogoRoute
   ComunicadosRoute: typeof ComunicadosRoute
   FeedbacksRoute: typeof FeedbacksRoute
   GamificacaoRoute: typeof GamificacaoRoute
   MapeamentoRiscosPsicossociaisRoute: typeof MapeamentoRiscosPsicossociaisRoute
   PainelRoute: typeof PainelRoute
+  PesquisaDesligamentoRoute: typeof PesquisaDesligamentoRoute
+  PesquisaEngajamentoRoute: typeof PesquisaEngajamentoRoute
+  PesquisaRapidaRoute: typeof PesquisaRapidaRoute
+  PesquisaSatisfacaoRoute: typeof PesquisaSatisfacaoRoute
   PlanosDesenvolvimentoRoute: typeof PlanosDesenvolvimentoRoute
   ProcessosSeletivosRoute: typeof ProcessosSeletivosRoute
   Reunioes11Route: typeof Reunioes11Route
+  SetoresRoute: typeof SetoresRoute
+  SuperPesquisaRoute: typeof SuperPesquisaRoute
   TodasAsPesquisasRoute: typeof TodasAsPesquisasRoute
   VagasRoute: typeof VagasRoute
   CandidaturaVagaIdRoute: typeof CandidaturaVagaIdRoute
+  ShopHistoricoRoute: typeof ShopHistoricoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -247,6 +351,13 @@ declare module '@tanstack/react-router' {
       path: '/carregando'
       fullPath: '/carregando'
       preLoaderRoute: typeof CarregandoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalogo': {
+      id: '/catalogo'
+      path: '/catalogo'
+      fullPath: '/catalogo'
+      preLoaderRoute: typeof CatalogoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/comunicados': {
@@ -284,6 +395,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PainelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pesquisa-desligamento': {
+      id: '/pesquisa-desligamento'
+      path: '/pesquisa-desligamento'
+      fullPath: '/pesquisa-desligamento'
+      preLoaderRoute: typeof PesquisaDesligamentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pesquisa-engajamento': {
+      id: '/pesquisa-engajamento'
+      path: '/pesquisa-engajamento'
+      fullPath: '/pesquisa-engajamento'
+      preLoaderRoute: typeof PesquisaEngajamentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pesquisa-rapida': {
+      id: '/pesquisa-rapida'
+      path: '/pesquisa-rapida'
+      fullPath: '/pesquisa-rapida'
+      preLoaderRoute: typeof PesquisaRapidaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pesquisa-satisfacao': {
+      id: '/pesquisa-satisfacao'
+      path: '/pesquisa-satisfacao'
+      fullPath: '/pesquisa-satisfacao'
+      preLoaderRoute: typeof PesquisaSatisfacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/planos-desenvolvimento': {
       id: '/planos-desenvolvimento'
       path: '/planos-desenvolvimento'
@@ -303,6 +442,20 @@ declare module '@tanstack/react-router' {
       path: '/reunioes-1-1'
       fullPath: '/reunioes-1-1'
       preLoaderRoute: typeof Reunioes11RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/setores': {
+      id: '/setores'
+      path: '/setores'
+      fullPath: '/setores'
+      preLoaderRoute: typeof SetoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/super-pesquisa': {
+      id: '/super-pesquisa'
+      path: '/super-pesquisa'
+      fullPath: '/super-pesquisa'
+      preLoaderRoute: typeof SuperPesquisaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/todas-as-pesquisas': {
@@ -333,6 +486,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CandidaturaVagaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shop/historico': {
+      id: '/shop/historico'
+      path: '/shop/historico'
+      fullPath: '/shop/historico'
+      preLoaderRoute: typeof ShopHistoricoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -352,17 +512,25 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AvaliacoesRoute: AvaliacoesRouteWithChildren,
   CarregandoRoute: CarregandoRoute,
+  CatalogoRoute: CatalogoRoute,
   ComunicadosRoute: ComunicadosRoute,
   FeedbacksRoute: FeedbacksRoute,
   GamificacaoRoute: GamificacaoRoute,
   MapeamentoRiscosPsicossociaisRoute: MapeamentoRiscosPsicossociaisRoute,
   PainelRoute: PainelRoute,
+  PesquisaDesligamentoRoute: PesquisaDesligamentoRoute,
+  PesquisaEngajamentoRoute: PesquisaEngajamentoRoute,
+  PesquisaRapidaRoute: PesquisaRapidaRoute,
+  PesquisaSatisfacaoRoute: PesquisaSatisfacaoRoute,
   PlanosDesenvolvimentoRoute: PlanosDesenvolvimentoRoute,
   ProcessosSeletivosRoute: ProcessosSeletivosRoute,
   Reunioes11Route: Reunioes11Route,
+  SetoresRoute: SetoresRoute,
+  SuperPesquisaRoute: SuperPesquisaRoute,
   TodasAsPesquisasRoute: TodasAsPesquisasRoute,
   VagasRoute: VagasRoute,
   CandidaturaVagaIdRoute: CandidaturaVagaIdRoute,
+  ShopHistoricoRoute: ShopHistoricoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
