@@ -178,42 +178,45 @@ function FormularioCheckin({
   enviando: boolean;
 }) {
   const restantes = LIMITE_MOTIVO - motivo.length;
+  const temEmocaoSelecionada = emocao !== null;
 
   return (
     <form className="mt-10 flex flex-col gap-5" onSubmit={onSubmit}>
       <SeletorEmocoes valor={emocao} onChange={onEmocaoChange} desabilitado={enviando} />
 
-      <div>
-        <Label htmlFor={ID_MOTIVO} className="text-sm font-semibold text-foreground">
-          Por que você está se sentindo assim?
-          <span className="ml-1 font-normal text-muted-foreground">(opcional)</span>
-        </Label>
-        <Textarea
-          id={ID_MOTIVO}
-          value={motivo}
-          onChange={(event) => onMotivoChange(event.target.value.slice(0, LIMITE_MOTIVO))}
-          maxLength={LIMITE_MOTIVO}
-          disabled={enviando}
-          rows={4}
-          autoFocus
-          placeholder="Escreva o que estiver na sua mente. Esse texto é sigiloso."
-          className="mt-2 resize-y rounded-xl border-border bg-background"
-        />
-        <p
-          className={cn(
-            "mt-1.5 text-right text-xs font-semibold",
-            restantes <= 500 ? "text-destructive" : "text-muted-foreground",
-          )}
-        >
-          {motivo.length.toLocaleString("pt-BR")} / {LIMITE_MOTIVO.toLocaleString("pt-BR")}{" "}
-          caracteres
-        </p>
-      </div>
+      {temEmocaoSelecionada ? (
+        <div>
+          <Label htmlFor={ID_MOTIVO} className="text-sm font-semibold text-foreground">
+            Por que você está se sentindo assim?
+            <span className="ml-1 font-normal text-muted-foreground">(opcional)</span>
+          </Label>
+          <Textarea
+            id={ID_MOTIVO}
+            value={motivo}
+            onChange={(event) => onMotivoChange(event.target.value.slice(0, LIMITE_MOTIVO))}
+            maxLength={LIMITE_MOTIVO}
+            disabled={enviando}
+            rows={4}
+            autoFocus
+            placeholder="Escreva o que estiver na sua mente. Esse texto é sigiloso."
+            className="mt-2 resize-y rounded-xl border-border bg-background"
+          />
+          <p
+            className={cn(
+              "mt-1.5 text-right text-xs font-semibold",
+              restantes <= 500 ? "text-destructive" : "text-muted-foreground",
+            )}
+          >
+            {motivo.length.toLocaleString("pt-BR")} / {LIMITE_MOTIVO.toLocaleString("pt-BR")}{" "}
+            caracteres
+          </p>
+        </div>
+      ) : null}
 
       <div className="flex justify-end">
         <Button
           type="submit"
-          disabled={enviando}
+          disabled={enviando || !temEmocaoSelecionada}
           className="min-w-52 bg-accent-yellow text-slate-900 shadow hover:bg-accent-yellow/90 hover:text-slate-900"
         >
           {enviando ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
