@@ -189,8 +189,8 @@ function Login() {
 
       <footer className="col-span-full px-6 py-7 text-center text-sm font-medium text-foreground lg:px-12">
         <p>
-          2026 - Todos os direitos reservados - Criado pelos desenvolvedores da{" "}
-          <span className="font-semibold text-brand">Orcoma Contabilidade</span> - G.
+          2026 - Todos os direitos reservados - Criado por{" "}
+          <span className="font-semibold text-brand">Gabriel Anacleto</span>
         </p>
       </footer>
     </main>
