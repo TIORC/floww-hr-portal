@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
+  BarChart3,
   Building2,
   CalendarClock,
   ChevronRight,
@@ -33,7 +34,7 @@ import { IndicadoresPainel } from "@/components/indicadores-painel";
 import { CheckinSentimento } from "@/components/checkin-sentimento";
 import { RankingMoedas } from "@/components/ranking-moedas";
 import { FlowwShop } from "@/components/floww-shop";
-import { MINHAS_MOEDAS } from "@/lib/ranking-mock";
+import { useRegistrarEntradaDiaria } from "@/hooks/use-floww-coins";
 import { usePerfil } from "@/hooks/use-perfil";
 import { useRegistrarAcesso } from "@/hooks/use-acessos-diarios";
 import { montarSaudacao } from "@/lib/greeting";
@@ -242,6 +243,7 @@ export function Sidebar() {
             </button>
             <div className="absolute left-full top-0 z-20 hidden pl-2 group-hover:block group-focus-within:block"><ul className="relative w-64 grid rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl before:absolute before:-left-2 before:top-0 before:h-full before:w-2 before:content-['']">
               {[
+                { label: "Relatórios Gerais", icon: BarChart3, to: "/relatorios-gerais" },
                 { label: "Pesquisa de Satisfação", icon: Smile, to: "/pesquisa-satisfacao" },
                 { label: "Pesquisa Rápida", icon: Zap, to: "/pesquisa-rapida" },
                 { label: "Super Pesquisa", icon: ClipboardList, to: "/super-pesquisa" },
@@ -326,7 +328,7 @@ export function Sidebar() {
             <div className="absolute left-full top-0 z-20 hidden pl-2 group-hover:block group-focus-within:block"><ul className="relative w-72 grid rounded-xl border border-white/10 bg-slate-900/95 p-1.5 shadow-xl before:absolute before:-left-2 before:top-0 before:h-full before:w-2 before:content-['']">
               {[
                 { label: "Setores", icon: Building2, to: "/setores" },
-                { label: "Cargos & Salários", icon: BadgeDollarSign },
+                { label: "Cargos & Salários", icon: BadgeDollarSign, to: "/cargos-salarios" },
                 { label: "Cadastros e Desligamentos", icon: UsersRound, to: "/cadastro-desligamento" },
               ].map(({ label, icon: Icon, to }) => (
                 <li key={label}>
@@ -392,8 +394,8 @@ function Painel() {
   const [chatAberto, setChatAberto] = useState(false);
   const [balloonMessageIndex, setBalloonMessageIndex] = useState(0);
   const [boasVindasAberto, setBoasVindasAberto] = useState(false);
-  const [saldoMoedas, setSaldoMoedas] = useState(MINHAS_MOEDAS);
   const { mutate: registrarAcesso } = useRegistrarAcesso();
+  const { mutate: registrarEntradaDiaria } = useRegistrarEntradaDiaria();
 
   useEffect(() => {
     if (consumirOnboarding()) setBoasVindasAberto(true);
@@ -417,13 +419,14 @@ function Painel() {
       }
       if (!cancelled && data.session) {
         registrarAcesso();
+        registrarEntradaDiaria();
       }
     });
 
     return () => {
       cancelled = true;
     };
-  }, [navigate, registrarAcesso]);
+  }, [navigate, registrarAcesso, registrarEntradaDiaria]);
 
   return (
     <div className="grid min-h-screen bg-background lg:grid-cols-[16rem_1fr]">
@@ -439,11 +442,8 @@ function Painel() {
         <IndicadoresPainel />
         <CheckinSentimento />
         <div className="mt-8 grid w-full gap-8 lg:grid-cols-[minmax(0,800px)_minmax(0,1fr)] lg:items-start">
-          <RankingMoedas saldo={saldoMoedas} />
-          <FlowwShop
-            saldo={saldoMoedas}
-            aoConfirmarResgate={(valor) => setSaldoMoedas((atual) => atual - valor)}
-          />
+          <RankingMoedas />
+          <FlowwShop />
         </div>
         <BoasVindasFlafy aberto={boasVindasAberto} onFechar={() => setBoasVindasAberto(false)} />
       </main>

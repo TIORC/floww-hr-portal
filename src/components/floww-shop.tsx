@@ -14,7 +14,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { PRODUTOS_SHOP, type ProdutoShop } from "@/lib/shop-mock";
+import {
+  type ProdutoShop,
+  useProdutosShop,
+  useResgatarProdutos,
+  useSaldoFlowwCoins,
+} from "@/hooks/use-floww-coins";
 
 const TITULO_SHOP = "floww-shop-titulo";
 const LIMITE_VITRINE_PAINEL = 6;
@@ -32,7 +37,7 @@ function CardProduto({
   saldo: number;
   aoSelecionar: (produto: ProdutoShop) => void;
 }) {
-  const esgotado = produto.esgotado || (produto.quantidadeEstoque ?? 0) <= 0;
+  const esgotado = produto.esgotado || produto.quantidade_estoque <= 0;
   const semSaldo = !esgotado && saldo < produto.preco;
   const bloqueado = esgotado || semSaldo;
   const faltam = Math.max(produto.preco - saldo, 0);
@@ -83,7 +88,7 @@ function CardProduto({
 
         {!esgotado && (
           <p className="text-[0.65rem] font-semibold text-muted-foreground">
-            Estoque: {formatarMoedas(produto.quantidadeEstoque ?? 0)} un.
+            Estoque: {formatarMoedas(produto.quantidade_estoque)} un.
           </p>
         )}
 
@@ -134,11 +139,13 @@ function ConfirmarResgateDialog({
   saldo,
   onConfirmar,
   onCancel,
+  confirmando,
 }: {
   produto: ProdutoShop;
   saldo: number;
   onConfirmar: () => void;
   onCancel: () => void;
+  confirmando: boolean;
 }) {
   const saldoFinal = Math.max(saldo - produto.preco, 0);
 
@@ -146,7 +153,7 @@ function ConfirmarResgateDialog({
     <AlertDialog
       open
       onOpenChange={(aberto) => {
-        if (!aberto) onCancel();
+        if (!aberto && !confirmando) onCancel();
       }}
     >
       <AlertDialogContent>
@@ -178,6 +185,7 @@ function ConfirmarResgateDialog({
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirmar}
+            disabled={confirmando}
             className="bg-[image:var(--gradient-brand)] text-primary-foreground hover:brightness-110"
           >
             Confirmar compra
@@ -188,20 +196,26 @@ function ConfirmarResgateDialog({
   );
 }
 
-export function FlowwShop({
-  saldo,
-  aoConfirmarResgate,
-}: {
-  saldo: number;
-  aoConfirmarResgate: (valor: number) => void;
-}) {
+export function FlowwShop() {
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoShop | null>(null);
+  const { data: saldoData } = useSaldoFlowwCoins();
+  const { data: produtos = [] } = useProdutosShop();
+  const resgatar = useResgatarProdutos();
+  const saldo = saldoData?.saldo ?? 0;
 
   function confirmarResgate() {
     if (!produtoSelecionado) return;
-    aoConfirmarResgate(produtoSelecionado.preco);
-    toast.success(`Resgate de "${produtoSelecionado.nome}" confirmado.`);
-    setProdutoSelecionado(null);
+    const produto = produtoSelecionado;
+    resgatar.mutate([{ produto_id: produto.id, quantidade: 1 }], {
+      onSuccess: () => {
+        toast.success(`Resgate de "${produto.nome}" confirmado.`);
+        setProdutoSelecionado(null);
+      },
+      onError: (erro) => {
+        toast.error(erro.message);
+        setProdutoSelecionado(null);
+      },
+    });
   }
 
   return (
@@ -238,7 +252,7 @@ export function FlowwShop({
         </div>
 
         <ul className="mt-4 grid flex-1 grid-cols-1 content-start gap-3 overflow-hidden sm:grid-cols-2">
-          {PRODUTOS_SHOP.slice(0, LIMITE_VITRINE_PAINEL).map((produto) => (
+          {produtos.slice(0, LIMITE_VITRINE_PAINEL).map((produto) => (
             <li key={produto.id} className="flex">
               <CardProduto produto={produto} saldo={saldo} aoSelecionar={setProdutoSelecionado} />
             </li>
@@ -262,6 +276,7 @@ export function FlowwShop({
           saldo={saldo}
           onConfirmar={confirmarResgate}
           onCancel={() => setProdutoSelecionado(null)}
+          confirmando={resgatar.isPending}
         />
       )}
     </section>

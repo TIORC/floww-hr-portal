@@ -6,7 +6,11 @@ import { Sidebar } from "@/routes/painel";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { TRANSACOES_SHOP, getTotalEntradas, getTotalSaidas, type TransacaoShop } from "@/lib/transacoes-mock";
+import {
+  type TransacaoFlowwCoins,
+  useSaldoFlowwCoins,
+  useTransacoesFlowwCoins,
+} from "@/hooks/use-floww-coins";
 import {
   ChartContainer,
   ChartTooltip,
@@ -118,7 +122,7 @@ function GraficoPizza({ totalEntradas, totalSaidas }: { totalEntradas: number; t
   );
 }
 
-function LinhaTransacao({ transacao }: { transacao: TransacaoShop }) {
+function LinhaTransacao({ transacao }: { transacao: TransacaoFlowwCoins }) {
   const isSaida = transacao.tipo === "saida";
   const Icone = isSaida ? Package : ArrowUpRight;
   const iconeCor = isSaida ? "text-destructive" : "text-accent-green";
@@ -132,7 +136,7 @@ function LinhaTransacao({ transacao }: { transacao: TransacaoShop }) {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-foreground">{transacao.descricao}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{formatarDataCompleta(transacao.data)}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{formatarDataCompleta(transacao.criado_em)}</p>
       </div>
       <div className="shrink-0 text-right">
         <p className={cn("font-display text-sm font-bold", valorCor)}>
@@ -144,14 +148,18 @@ function LinhaTransacao({ transacao }: { transacao: TransacaoShop }) {
 }
 
 function HistoricoPage() {
-  const totalEntradas = getTotalEntradas();
-  const totalSaidas = getTotalSaidas();
-  const saldoAtual = totalEntradas - totalSaidas;
+  const { data: transacoes = [] } = useTransacoesFlowwCoins();
+  const { data: saldoData } = useSaldoFlowwCoins();
 
-  const transacoesOrdenadas = useMemo(
-    () => [...TRANSACOES_SHOP].sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()),
-    []
+  const totalEntradas = useMemo(
+    () => transacoes.filter((t) => t.tipo === "entrada").reduce((soma, t) => soma + t.valor, 0),
+    [transacoes]
   );
+  const totalSaidas = useMemo(
+    () => transacoes.filter((t) => t.tipo === "saida").reduce((soma, t) => soma + t.valor, 0),
+    [transacoes]
+  );
+  const saldoAtual = saldoData?.saldo ?? 0;
 
   return (
     <div className="grid min-h-screen bg-background lg:grid-cols-[16rem_1fr]">
@@ -205,7 +213,7 @@ function HistoricoPage() {
               Lista de todas as movimentações ordenadas da mais recente para a mais antiga.
             </p>
             <div className="mt-4 space-y-3" role="list" aria-label="Histórico de transações">
-              {transacoesOrdenadas.map((transacao) => (
+              {transacoes.map((transacao) => (
                 <LinhaTransacao key={transacao.id} transacao={transacao} />
               ))}
             </div>

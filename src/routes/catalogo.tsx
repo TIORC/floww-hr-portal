@@ -4,8 +4,12 @@ import { ConheçaLojaDialog } from "@/components/onboarding/conheca-loja-dialog"
 import { PerfilFlutuante } from "@/components/perfil-flutuante";
 import { catalogoJaVisitado, marcarCatalogoVisitado } from "@/lib/onboarding-catalogo";
 import { Sidebar } from "@/routes/painel";
-import { PRODUTOS_SHOP, type ProdutoShop } from "@/lib/shop-mock";
-import { MINHAS_MOEDAS } from "@/lib/ranking-mock";
+import {
+  type ProdutoShop,
+  useProdutosShop,
+  useResgatarProdutos,
+  useSaldoFlowwCoins,
+} from "@/hooks/use-floww-coins";
 import { Coins, ShoppingCart, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -36,7 +40,7 @@ function CardProdutoCatalogo({
   aoComprar: (produto: ProdutoShop) => void;
   aoAdicionarCarrinho: (produto: ProdutoShop) => void;
 }) {
-  const esgotado = produto.esgotado || (produto.quantidadeEstoque ?? 0) <= 0;
+  const esgotado = produto.esgotado || produto.quantidade_estoque <= 0;
   const semSaldo = !esgotado && saldo < produto.preco;
   const bloqueado = esgotado || semSaldo;
   const faltam = Math.max(produto.preco - saldo, 0);
@@ -44,8 +48,8 @@ function CardProdutoCatalogo({
   return (
     <article className="product-card h-full rounded-xl border border-border bg-background transition hover:border-brand/30">
       <div className="product-card-header flex w-full items-center justify-center bg-muted/40">
-        {produto.imagem ? (
-          <img src={produto.imagem} alt={produto.nome} className="h-full w-full object-cover" />
+        {produto.imagem_url ? (
+          <img src={produto.imagem_url} alt={produto.nome} className="h-full w-full object-cover" />
         ) : (
           <span className="text-xs text-muted-foreground">Sem imagem</span>
         )}
@@ -70,7 +74,7 @@ function CardProdutoCatalogo({
             )}
 
             <span className="text-xs font-medium text-muted-foreground">
-              Estoque: {produto.quantidadeEstoque ?? 0}
+              Estoque: {produto.quantidade_estoque}
             </span>
           </div>
 
@@ -112,8 +116,10 @@ function CardProdutoCatalogo({
 
 function CatalogoPage() {
   const [conhecaLojaAberto, setConheçaLojaAberto] = useState(false);
-  const [saldo, setSaldo] = useState(MINHAS_MOEDAS);
-  const [produtos, setProdutos] = useState<ProdutoShop[]>(PRODUTOS_SHOP);
+  const { data: saldoData } = useSaldoFlowwCoins();
+  const { data: produtos = [] } = useProdutosShop();
+  const resgatar = useResgatarProdutos();
+  const saldo = saldoData?.saldo ?? 0;
   const [carrinho, setCarrinho] = useState<ItemCarrinho[]>([]);
   const [carrinhoAberto, setCarrinhoAberto] = useState(false);
 
@@ -127,24 +133,18 @@ function CatalogoPage() {
   }
 
   function comprar(produto: ProdutoShop) {
-    if (produto.esgotado || (produto.quantidadeEstoque ?? 0) <= 0 || saldo < produto.preco) {
+    if (produto.esgotado || produto.quantidade_estoque <= 0 || saldo < produto.preco) {
       return;
     }
 
-    setSaldo((atual) => atual - produto.preco);
-    setProdutos((lista) =>
-      lista.map((item) =>
-        item.id === produto.id
-          ? { ...item, quantidadeEstoque: (item.quantidadeEstoque ?? 0) - 1 }
-          : item,
-      ),
-    );
-
-    toast.success(`Compra de "${produto.nome}" realizada com sucesso!`);
+    resgatar.mutate([{ produto_id: produto.id, quantidade: 1 }], {
+      onSuccess: () => toast.success(`Compra de "${produto.nome}" realizada com sucesso!`),
+      onError: (erro) => toast.error(erro.message),
+    });
   }
 
   function adicionarAoCarrinho(produto: ProdutoShop) {
-    if (produto.esgotado || (produto.quantidadeEstoque ?? 0) <= 0) return;
+    if (produto.esgotado || produto.quantidade_estoque <= 0) return;
 
     setCarrinho((lista) => {
       const existente = lista.find((item) => item.produto.id === produto.id);
@@ -179,14 +179,11 @@ function CatalogoPage() {
     }
 
     const produtosSemEstoque: string[] = [];
-    const carrinhoAtualizado: ItemCarrinho[] = [];
 
     carrinho.forEach((item) => {
       const produtoAtual = produtos.find((p) => p.id === item.produto.id);
-      if (!produtoAtual || (produtoAtual.quantidadeEstoque ?? 0) < item.quantidade) {
+      if (!produtoAtual || produtoAtual.quantidade_estoque < item.quantidade) {
         produtosSemEstoque.push(item.produto.nome);
-      } else {
-        carrinhoAtualizado.push(item);
       }
     });
 
@@ -197,25 +194,19 @@ function CatalogoPage() {
       return;
     }
 
-    carrinhoAtualizado.forEach((item) => {
-      setProdutos((lista) =>
-        lista.map((p) =>
-          p.id === item.produto.id
-            ? {
-                ...p,
-                quantidadeEstoque: (p.quantidadeEstoque ?? 0) - item.quantidade,
-              }
-            : p,
-        ),
-      );
-    });
-
-    const quantidadeItens = carrinhoAtualizado.reduce((s, i) => s + i.quantidade, 0);
-    setSaldo((atual) => atual - total);
-    setCarrinho([]);
-    setCarrinhoAberto(false);
-    toast.success(
-      `Compra finalizada! ${quantidadeItens} ${quantidadeItens === 1 ? "item" : "itens"} resgatado${quantidadeItens === 1 ? "" : "s"}.`,
+    const quantidadeItens = carrinho.reduce((s, i) => s + i.quantidade, 0);
+    resgatar.mutate(
+      carrinho.map((item) => ({ produto_id: item.produto.id, quantidade: item.quantidade })),
+      {
+        onSuccess: () => {
+          setCarrinho([]);
+          setCarrinhoAberto(false);
+          toast.success(
+            `Compra finalizada! ${quantidadeItens} ${quantidadeItens === 1 ? "item" : "itens"} resgatado${quantidadeItens === 1 ? "" : "s"}.`,
+          );
+        },
+        onError: (erro) => toast.error(erro.message),
+      },
     );
   }
 
@@ -314,7 +305,7 @@ function CatalogoPage() {
                         type="button"
                         className="w-full"
                         onClick={finalizarCompra}
-                        disabled={calcularTotalCarrinho() > saldo}
+                        disabled={calcularTotalCarrinho() > saldo || resgatar.isPending}
                       >
                         Finalizar compra
                       </Button>

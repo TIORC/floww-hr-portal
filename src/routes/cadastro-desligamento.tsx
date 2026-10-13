@@ -6,6 +6,7 @@ import * as XLSX from "xlsx";
 
 import { PerfilFlutuante } from "@/components/perfil-flutuante";
 import { CadastrarColaboradorDialog } from "@/components/cadastrar-colaborador-dialog";
+import { DetalhesColaboradorDialog } from "@/components/detalhes-colaborador-dialog";
 import { Sidebar } from "@/routes/painel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -99,29 +100,77 @@ type LinhaImportada = {
   erro?: string;
 };
 
+type ItemRelatorioImportacao = {
+  nome: string;
+  identificador: string;
+  motivo: string;
+};
+
+type RelatorioImportacao = {
+  salvos: number;
+  duplicados: ItemRelatorioImportacao[];
+  falhas: ItemRelatorioImportacao[];
+};
+
+const TAMANHO_PAGINA_BANCO = 1000;
+
+// Busca todas as chaves já cadastradas (ID, e-mail e CPF), página a página.
+async function buscarChavesExistentes() {
+  const chaves: { id_planilha: string; email: string; cpf: string }[] = [];
+  for (let inicio = 0; ; inicio += TAMANHO_PAGINA_BANCO) {
+    const { data, error } = await supabase
+      .from("colaboradores_importados")
+      .select("id_planilha, email, cpf")
+      .order("id_planilha", { ascending: true })
+      .range(inicio, inicio + TAMANHO_PAGINA_BANCO - 1);
+    if (error) throw error;
+    chaves.push(...(data ?? []));
+    if (!data || data.length < TAMANHO_PAGINA_BANCO) break;
+  }
+  return chaves;
+}
+
 function normalizarTexto(valor: unknown) {
   if (valor instanceof Date) return valor.toLocaleDateString("pt-BR");
   return String(valor ?? "").trim();
 }
 
-function normalizarCabecalho(valor: unknown) {
-  return normalizarTexto(valor).toLowerCase().replace(/\s+/g, " ").trim();
+// Compara nomes de coluna ignorando maiúsculas, acentos, espaços e pontuação.
+// Ex.: "Matrícula", "matricula" e "MATRICULA" viram "matricula".
+function chaveColuna(valor: unknown) {
+  return normalizarTexto(valor)
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
 }
 
 function ehLinhaVazia(valores: unknown[]) {
   return valores.every((valor) => normalizarTexto(valor) === "");
 }
 
-function validarCabecalho(valores: unknown[]) {
-  if (valores.length < COLUNAS_MODELO.length) {
-    return `O cabeçalho precisa ter as ${COLUNAS_MODELO.length} colunas nessa ordem.`;
+// Localiza cada coluna pelo nome no cabeçalho. Colunas ausentes ou vazias são aceitas.
+function mapearColunas(cabecalho: unknown[]) {
+  const indicePorColuna = new Map<string, number>();
+  cabecalho.forEach((valor, indice) => {
+    const chave = chaveColuna(valor);
+    if (chave && !indicePorColuna.has(chave)) indicePorColuna.set(chave, indice);
+  });
+  return indicePorColuna;
+}
+
+function validarCabecalho(indicePorColuna: Map<string, number>) {
+  const faltando: string[] = [];
+  if (!indicePorColuna.has(chaveColuna("ID"))) faltando.push("ID");
+  if (!indicePorColuna.has(chaveColuna("Email"))) faltando.push("Email");
+  if (
+    !indicePorColuna.has(chaveColuna("Nome")) &&
+    !indicePorColuna.has(chaveColuna("Nome Completo"))
+  ) {
+    faltando.push("Nome ou Nome Completo");
   }
-  for (let indice = 0; indice < COLUNAS_MODELO.length; indice += 1) {
-    const esperado = normalizarCabecalho(COLUNAS_MODELO[indice]);
-    const recebido = normalizarCabecalho(valores[indice]);
-    if (recebido !== esperado) {
-      return `Coluna ${indice + 1} deve ser "${COLUNAS_MODELO[indice]}".`;
-    }
+  if (faltando.length > 0) {
+    return `Colunas obrigatórias não encontradas no cabeçalho: ${faltando.join(", ")}.`;
   }
   return null;
 }
@@ -139,18 +188,20 @@ function lerPlanilha(arquivo: File) {
           return;
         }
         const planilha = workbook.Sheets[primeiraAba];
-        // Lê por posição: a planilha sempre vem com cabeçalho nas 28 colunas em ordem.
+        // raw: false usa o texto exibido na célula, para preservar zeros à esquerda (CPF, Matrícula).
         const matriz = XLSX.utils.sheet_to_json<unknown[]>(planilha, {
           header: 1,
           defval: "",
           blankrows: false,
+          raw: false,
         });
         const linhasMatriz = matriz.filter((linha) => Array.isArray(linha) && !ehLinhaVazia(linha));
         if (linhasMatriz.length === 0) {
           resolve([]);
           return;
         }
-        const erroCabecalho = validarCabecalho(linhasMatriz[0]);
+        const indicePorColuna = mapearColunas(linhasMatriz[0]);
+        const erroCabecalho = validarCabecalho(indicePorColuna);
         if (erroCabecalho) {
           reject(new Error(erroCabecalho));
           return;
@@ -158,8 +209,10 @@ function lerPlanilha(arquivo: File) {
         const linhasDados = linhasMatriz.slice(1);
         const normalizadas: LinhaImportada[] = linhasDados.map((valores) => {
           const dadosLinha: Record<string, string> = {};
-          COLUNAS_MODELO.forEach((coluna, indice) => {
-            dadosLinha[coluna] = normalizarTexto(valores[indice]);
+          // Campo vazio ou coluna ausente fica como "" e não bloqueia a importação.
+          COLUNAS_MODELO.forEach((coluna) => {
+            const indice = indicePorColuna.get(chaveColuna(coluna));
+            dadosLinha[coluna] = indice === undefined ? "" : normalizarTexto(valores[indice]);
           });
           const nome = dadosLinha["Nome Completo"] || dadosLinha["Nome"];
           const setor = dadosLinha["Departamento"];
@@ -228,10 +281,12 @@ function CadastroDesligamentoPage() {
   const [busca, setBusca] = useState("");
   const [dialogoImportarAberto, setDialogoImportarAberto] = useState(false);
   const [dialogoCadastroAberto, setDialogoCadastroAberto] = useState(false);
+  const [colaboradorDetalhe, setColaboradorDetalhe] = useState<ColaboradorLinha | null>(null);
   const [linhasImportadas, setLinhasImportadas] = useState<LinhaImportada[]>([]);
   const [nomeArquivo, setNomeArquivo] = useState("");
   const [lendoArquivo, setLendoArquivo] = useState(false);
   const [salvandoImportacao, setSalvandoImportacao] = useState(false);
+  const [relatorioImportacao, setRelatorioImportacao] = useState<RelatorioImportacao | null>(null);
   const inputArquivoRef = useRef<HTMLInputElement>(null);
 
   function mapearBancoParaLinha(item: Record<string, string | null>): ColaboradorLinha {
@@ -346,6 +401,7 @@ function CadastroDesligamentoPage() {
   function abrirImportacao() {
     setLinhasImportadas([]);
     setNomeArquivo("");
+    setRelatorioImportacao(null);
     setDialogoImportarAberto(true);
   }
 
@@ -388,75 +444,107 @@ function CadastroDesligamentoPage() {
       return;
     }
     setSalvandoImportacao(true);
+    setRelatorioImportacao(null);
     try {
-      const registros = linhasValidas.map((linha) => ({
-        id_planilha: linha.dados["ID"],
-        nome: linha.dados["Nome"] || linha.nome,
-        nome_completo: linha.nome,
-        matricula: linha.dados["Matricula"],
-        email: linha.dados["Email"],
-        cpf: linha.dados["CPF"],
-        cargo: linha.dados["Cargo"],
-        cargo_visivel: linha.dados["Cargo Visível ( editável )"],
-        unidade: linha.dados["Unidade"],
-        departamento: linha.dados["Departamento"],
-        grupos: linha.dados["Grupos"],
-        papel: linha.dados["Papel"],
-        gestor_direto: linha.dados["Gestor Direto"],
-        etnia: linha.dados["Etnia"],
-        sexo: linha.dados["Sexo"],
-        genero: linha.dados["Gênero"],
-        data_nascimento: linha.dados["Data de Nascimento"],
-        data_admissao: linha.dados["Data de Admissão"],
-        data_cadastro: linha.dados["Data de Cadastro"],
-        situacao: linha.dados["Situação"],
-        ultimo_acesso: linha.dados["Ultimo Acesso"],
-        origem_cadastro: linha.dados["Origem do Cadastro"],
-        gestor_direto_email: linha.dados["Gestor Direto - E-mail"],
-        participa_gamificacao: linha.dados["Participa gamificação"],
-        desligamento: linha.dados["Desligamento"],
-        ultimo_dia_trabalhado: linha.dados["Ultimo dia trabalhado"],
-        biografia: linha.dados["Biografia"],
-        idioma: linha.dados["Idioma"],
-      }));
+      // Regra: quem já está no banco prevalece. Duplicado por ID, E-mail ou CPF é ignorado
+      // (sem criar registro novo). Dentro da própria planilha vale a primeira ocorrência.
+      const existentes = await buscarChavesExistentes();
+      const idsVistos = new Set(existentes.map((item) => item.id_planilha.trim()));
+      const emailsVistos = new Set(existentes.map((item) => item.email.trim().toLowerCase()));
+      const cpfsVistos = new Set(existentes.map((item) => item.cpf.trim()).filter(Boolean));
 
-      // Duplicado considera ID e E-mail: tenta por ID, se conflitar atualiza pelo email.
-      let salvos = 0;
-      let atualizados = 0;
-      for (const registro of registros) {
-        const { error } = await supabase
-          .from("colaboradores_importados")
-          .upsert(registro, { onConflict: "id_planilha" });
-        if (!error) {
-          salvos += 1;
+      const relatorio: RelatorioImportacao = { salvos: 0, duplicados: [], falhas: [] };
+
+      // Cada linha é gravada separadamente: um erro não interrompe as demais.
+      for (const linha of linhasImportadas) {
+        const nome = linha.nome || "(sem nome)";
+        const identificador = linha.dados["ID"] || linha.dados["Email"] || "(sem ID)";
+        if (linha.erro) {
+          relatorio.falhas.push({ nome, identificador, motivo: linha.erro });
           continue;
         }
-        if (error.code === "23505") {
-          const { error: erroEmail } = await supabase
-            .from("colaboradores_importados")
-            .update({ ...registro, atualizado_em: new Date().toISOString() })
-            .eq("email", registro.email);
-          if (!erroEmail) {
-            atualizados += 1;
-            continue;
-          }
+
+        const id = linha.dados["ID"].trim();
+        const email = linha.dados["Email"].trim().toLowerCase();
+        const cpf = linha.dados["CPF"].trim();
+
+        const motivoDuplicado = idsVistos.has(id)
+          ? "ID já cadastrado"
+          : emailsVistos.has(email)
+            ? "E-mail já cadastrado"
+            : cpf && cpfsVistos.has(cpf)
+              ? "CPF já cadastrado"
+              : null;
+        if (motivoDuplicado) {
+          relatorio.duplicados.push({ nome, identificador, motivo: motivoDuplicado });
+          continue;
         }
-        throw error;
+
+        const registro = {
+          id_planilha: linha.dados["ID"],
+          nome: linha.dados["Nome"] || linha.nome,
+          nome_completo: linha.nome,
+          matricula: linha.dados["Matricula"],
+          email: linha.dados["Email"],
+          cpf: linha.dados["CPF"],
+          cargo: linha.dados["Cargo"],
+          cargo_visivel: linha.dados["Cargo Visível ( editável )"],
+          unidade: linha.dados["Unidade"],
+          departamento: linha.dados["Departamento"],
+          grupos: linha.dados["Grupos"],
+          papel: linha.dados["Papel"],
+          gestor_direto: linha.dados["Gestor Direto"],
+          etnia: linha.dados["Etnia"],
+          sexo: linha.dados["Sexo"],
+          genero: linha.dados["Gênero"],
+          data_nascimento: linha.dados["Data de Nascimento"],
+          data_admissao: linha.dados["Data de Admissão"],
+          data_cadastro: linha.dados["Data de Cadastro"],
+          situacao: linha.dados["Situação"],
+          ultimo_acesso: linha.dados["Ultimo Acesso"],
+          origem_cadastro: linha.dados["Origem do Cadastro"],
+          gestor_direto_email: linha.dados["Gestor Direto - E-mail"],
+          participa_gamificacao: linha.dados["Participa gamificação"],
+          desligamento: linha.dados["Desligamento"],
+          ultimo_dia_trabalhado: linha.dados["Ultimo dia trabalhado"],
+          biografia: linha.dados["Biografia"],
+          idioma: linha.dados["Idioma"],
+        };
+
+        const { error } = await supabase.from("colaboradores_importados").insert(registro);
+        if (error) {
+          relatorio.falhas.push({ nome, identificador, motivo: error.message });
+          continue;
+        }
+
+        idsVistos.add(id);
+        emailsVistos.add(email);
+        if (cpf) cpfsVistos.add(cpf);
+        relatorio.salvos += 1;
       }
 
-      toast.success(
-        `${salvos + atualizados} colaborador(es) salvo(s) no banco.` +
-          (atualizados > 0 ? ` ${atualizados} atualizado(s) por E-mail duplicado.` : ""),
-      );
-      setDialogoImportarAberto(false);
+      setRelatorioImportacao(relatorio);
       setLinhasImportadas([]);
       setNomeArquivo("");
+      const resumo = `${relatorio.salvos} salvo(s), ${relatorio.duplicados.length} duplicado(s) ignorado(s), ${relatorio.falhas.length} com erro.`;
+      if (relatorio.falhas.length > 0) {
+        toast.warning(resumo);
+      } else {
+        toast.success(resumo);
+      }
       await carregarColaboradores();
     } catch (error) {
-      if (error instanceof Error && "code" in error && error.code === "42P01") {
+      console.error("Erro na importação de colaboradores:", error);
+      const erroBanco = error as { code?: string; message?: string; details?: string };
+      if (erroBanco?.code === "42P01") {
         toast.error("Tabela ainda não criada. Rode a migration 20261007000000.");
       } else {
-        toast.error("Não foi possível salvar a importação no banco.");
+        const detalhe = [erroBanco?.code, erroBanco?.message, erroBanco?.details]
+          .filter(Boolean)
+          .join(" | ");
+        toast.error(
+          `Não foi possível consultar os cadastros existentes. Nada foi importado.${detalhe ? ` Detalhe: ${detalhe}` : ""}`,
+        );
       }
     } finally {
       setSalvandoImportacao(false);
@@ -535,7 +623,11 @@ function CadastroDesligamentoPage() {
                   </TableHeader>
                   <TableBody>
                     {colaboradoresFiltrados.map((colaborador) => (
-                      <TableRow key={colaborador.id}>
+                      <TableRow
+                        key={colaborador.id}
+                        className="cursor-pointer"
+                        onClick={() => setColaboradorDetalhe(colaborador)}
+                      >
                         <TableCell
                           className={
                             colaborador.nome.trim().toLowerCase() === "ti maracas"
@@ -577,8 +669,10 @@ function CadastroDesligamentoPage() {
             <DialogHeader>
               <DialogTitle>Importar Colaboradores (Planilha)</DialogTitle>
               <DialogDescription>
-                Envie uma planilha do Excel (.xlsx, .xls ou .csv) com as 28 colunas nesta
-                ordem: {COLUNAS_MODELO.join(", ")}.
+                Envie uma planilha do Excel (.xlsx, .xls ou .csv) com a primeira linha de
+                cabeçalho. As colunas são reconhecidas pelo nome, em qualquer ordem, e as vazias
+                podem ser omitidas. Obrigatórias: ID, Nome (ou Nome Completo) e Email. Colunas
+                do modelo: {COLUNAS_MODELO.join(", ")}.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4">
@@ -611,6 +705,40 @@ function CadastroDesligamentoPage() {
                   <p className="text-sm text-muted-foreground">Arquivo: {nomeArquivo}</p>
                 ) : null}
               </div>
+              {relatorioImportacao ? (
+                <div className="grid gap-3 rounded-xl border border-border p-4 text-sm">
+                  <p className="font-medium text-foreground">
+                    {relatorioImportacao.salvos} salvo(s) · {relatorioImportacao.duplicados.length}{" "}
+                    duplicado(s) ignorado(s) · {relatorioImportacao.falhas.length} com erro
+                  </p>
+                  {relatorioImportacao.falhas.length > 0 ? (
+                    <div>
+                      <p className="mb-1 font-medium text-destructive">Com erro (corrija e envie de novo):</p>
+                      <ul className="grid gap-1 text-muted-foreground">
+                        {relatorioImportacao.falhas.map((item, indice) => (
+                          <li key={`falha-${indice}`}>
+                            {item.nome} ({item.identificador}): {item.motivo}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {relatorioImportacao.duplicados.length > 0 ? (
+                    <div>
+                      <p className="mb-1 font-medium text-foreground">
+                        Duplicados (mantido o cadastro anterior):
+                      </p>
+                      <ul className="grid gap-1 text-muted-foreground">
+                        {relatorioImportacao.duplicados.map((item, indice) => (
+                          <li key={`duplicado-${indice}`}>
+                            {item.nome} ({item.identificador}): {item.motivo}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
               {linhasImportadas.length > 0 ? (
                 <div className="max-h-72 overflow-auto rounded-xl border border-border">
                   <Table>
@@ -652,14 +780,15 @@ function CadastroDesligamentoPage() {
                     </TableBody>
                   </Table>
                 </div>
-              ) : (
+              ) : relatorioImportacao ? null : (
                 <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
                   Nenhuma planilha selecionada. Escolha um arquivo para ver o preview aqui.
                 </p>
               )}
               <p className="text-xs text-muted-foreground">
                 {linhasValidas.length} de {linhasImportadas.length} linha(s) válida(s). Linhas
-                sem ID, Email ou Nome, e duplicadas por ID/E-mail, são ignoradas.
+                sem ID, Email ou Nome são marcadas com erro. Duplicados por ID, E-mail ou CPF já
+                cadastrados são ignorados (vale o cadastro anterior).
               </p>
             </div>
             <DialogFooter>
@@ -689,6 +818,10 @@ function CadastroDesligamentoPage() {
           aberto={dialogoCadastroAberto}
           aoFechar={() => setDialogoCadastroAberto(false)}
           aoSalvar={carregarColaboradores}
+        />
+        <DetalhesColaboradorDialog
+          colaborador={colaboradorDetalhe}
+          aoFechar={() => setColaboradorDetalhe(null)}
         />
       </main>
     </div>

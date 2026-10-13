@@ -6,18 +6,23 @@ import { Sidebar } from "@/routes/painel";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getIniciais } from "@/lib/iniciais";
-import { ACOES_GAMIFICACAO, PARTICIPANTES_GAMIFICACAO } from "@/lib/gamificacao-mock";
+import { ACOES_GAMIFICACAO } from "@/lib/gamificacao-mock";
+import { useRankingFlowwCoins } from "@/hooks/use-floww-coins";
 
 export const Route = createFileRoute("/gamificacao")({ component: GamificacaoPage });
 
 function GamificacaoPage() {
   const [busca, setBusca] = useState("");
   const [filtro, setFiltro] = useState("todos");
-  const totalMoedas = PARTICIPANTES_GAMIFICACAO.reduce((total, pessoa) => total + pessoa.moedas, 0);
-  const participantes = useMemo(() => PARTICIPANTES_GAMIFICACAO
-    .filter((pessoa) => filtro === "todos" || pessoa.perfil.toLowerCase() === filtro)
-    .filter((pessoa) => `${pessoa.nome} ${pessoa.departamento}`.toLowerCase().includes(busca.toLowerCase()))
-    .sort((a, b) => b.moedas - a.moedas), [busca, filtro]);
+  const { data: ranking = [], isPending } = useRankingFlowwCoins();
+  const totalMoedas = ranking.reduce((total, pessoa) => total + pessoa.saldo, 0);
+  const participantes = useMemo(() => ranking
+    .filter((pessoa) => {
+      if (filtro === "todos") return true;
+      const ehGestor = /gestor/i.test(pessoa.papel);
+      return filtro === "gestor" ? ehGestor : !ehGestor;
+    })
+    .filter((pessoa) => `${pessoa.nome} ${pessoa.departamento}`.toLowerCase().includes(busca.toLowerCase())), [ranking, busca, filtro]);
 
   return (
     <div className="grid min-h-screen bg-background lg:grid-cols-[16rem_1fr]">
@@ -74,10 +79,10 @@ function GamificacaoPage() {
                     <h3 className="mt-1 font-display text-sm font-semibold text-foreground">{pessoa.nome}</h3>
                     <p className="mt-2 text-sm text-muted-foreground">{pessoa.departamento}</p>
                   </div>
-                  <span className="mt-4 inline-flex items-center gap-1.5 rounded-sm bg-accent-yellow px-2.5 py-1 text-xs font-semibold text-slate-900"><Coins className="size-3" aria-hidden />{pessoa.moedas.toLocaleString("pt-BR")} Floww Coins</span>
+                  <span className="mt-4 inline-flex items-center gap-1.5 rounded-sm bg-accent-yellow px-2.5 py-1 text-xs font-semibold text-slate-900"><Coins className="size-3" aria-hidden />{pessoa.saldo.toLocaleString("pt-BR")} Floww Coins</span>
                 </li>
               ))}
-            </ol> : <p className="py-12 text-center text-sm text-muted-foreground">Nenhuma pessoa encontrada.</p>}
+            </ol> : <p className="py-12 text-center text-sm text-muted-foreground">{isPending ? "Carregando ranking..." : "Nenhuma pessoa encontrada."}</p>}
           </section>
         </section>
       </main>

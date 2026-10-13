@@ -1,16 +1,16 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Loader2, Pencil } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
-import { LIMITE_MOTIVO, EMOCOES_SENTIMENTO, getEmocaoSentimento, isEmocaoSentimento, type EmocaoSentimento } from "@/lib/sentimento";
+import { LIMITE_MOTIVO, EMOCOES_SENTIMENTO, isEmocaoSentimento, type EmocaoSentimento } from "@/lib/sentimento";
 import {
   CHECKIN_SENTIMENTO_QUERY_KEY,
   useCheckinDoDia,
   useRegistrarCheckinSentimento,
-  type CheckinDoDia,
 } from "@/hooks/use-checkin-sentimento";
+import { usePesquisasPendentes, type PesquisaPendente } from "@/hooks/use-pesquisas-pendentes";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -118,46 +118,49 @@ function SeletorEmocoes({
   );
 }
 
-function RespostaRegistrada({
-  checkin,
-  onEditar,
-}: {
-  checkin: CheckinDoDia;
-  onEditar: () => void;
-}) {
-  const emocao = getEmocaoSentimento(checkin.emocao);
+const TIPO_PESQUISA_ROTULO: Record<string, string> = {
+  satisfacao: "Pesquisa de Satisfação",
+  rapida: "Pesquisa Rápida",
+  super: "Super Pesquisa",
+  desligamento: "Pesquisa de Desligamento",
+  engajamento: "Pesquisa de Engajamento",
+};
 
+// Estado exibido quando não sobra nenhuma pendência (check-in respondido e nenhuma pesquisa aberta).
+function SemPendencias() {
   return (
-    <div className="mt-6 flex flex-col items-center gap-5 rounded-2xl border border-border bg-background p-6 sm:flex-row">
-      {emocao ? (
-        <ArteEmocao
-          emocao={emocao}
-          imgClassName="h-auto w-56 shrink-0 object-contain sm:w-72"
-          emojiClassName="text-8xl leading-none sm:text-9xl"
-        />
-      ) : null}
+    <div className="mt-6 flex flex-col items-center gap-3 text-center">
+      <img src="/sleep.png" alt="" aria-hidden="true" className="h-24 w-auto object-contain" />
+      <p className="text-sm italic text-muted-foreground">Finalmente. Posso dormir em paz</p>
+    </div>
+  );
+}
 
-      <div className="min-w-0 flex-1 text-center sm:text-left">
-        <p className="flex items-center justify-center gap-2 font-display text-lg font-bold text-foreground sm:justify-start">
-          <CheckCircle2 className="size-5 shrink-0 text-accent-green" aria-hidden />
-          Hoje você está se sentindo {emocao?.rotulo.toLowerCase()}.
-        </p>
+function PesquisasPendentes({ pesquisas }: { pesquisas: PesquisaPendente[] }) {
+  return (
+    <div>
+      <h3 className="font-display text-lg font-semibold text-foreground">Pesquisas pendentes</h3>
+      <ul className="mt-3 grid gap-3">
+        {pesquisas.map((pesquisa) => {
+          const prazo = new Date(`${pesquisa.prazo}T00:00:00`).toLocaleDateString("pt-BR");
 
-        {checkin.motivo ? (
-          <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">{checkin.motivo}</p>
-        ) : (
-          <p className="mt-2 text-sm text-muted-foreground">Você não contou o porquê.</p>
-        )}
-
-        <p className="mt-3 text-xs font-semibold text-accent-green">
-          Resposta registrada. Ela zera à meia-noite.
-        </p>
-      </div>
-
-      <Button type="button" variant="outline" className="shrink-0" onClick={onEditar}>
-        <Pencil className="size-4" aria-hidden />
-        Alterar
-      </Button>
+          return (
+            <li
+              key={pesquisa.id}
+              className="rounded-2xl border border-border bg-background p-4"
+            >
+              <p className="font-semibold text-foreground">{pesquisa.titulo}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {TIPO_PESQUISA_ROTULO[pesquisa.tipo] ?? "Pesquisa"} · Responder até {prazo}
+                {pesquisa.anonima ? " · Anônima" : ""}
+              </p>
+              {pesquisa.descricao ? (
+                <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{pesquisa.descricao}</p>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
@@ -231,8 +234,8 @@ export function CheckinSentimento() {
   const queryClient = useQueryClient();
   const { data: checkin, isError } = useCheckinDoDia();
   const { mutate: registrar, isPending: enviando } = useRegistrarCheckinSentimento();
+  const { data: pesquisas, isSuccess: pesquisasCarregadas } = usePesquisasPendentes();
 
-  const [editando, setEditando] = useState(false);
   const [emocao, setEmocao] = useState<EmocaoSentimento | null>(null);
   const [motivo, setMotivo] = useState("");
 
@@ -249,20 +252,6 @@ export function CheckinSentimento() {
     return () => window.clearTimeout(intervalo);
   }, [queryClient]);
 
-  useEffect(() => {
-    if (!checkin || editando) return;
-    setEmocao(checkin.emocao);
-    setMotivo(checkin.motivo);
-  }, [checkin, editando]);
-
-  function iniciarEdicao() {
-    if (checkin) {
-      setEmocao(checkin.emocao);
-      setMotivo(checkin.motivo);
-    }
-    setEditando(true);
-  }
-
   function enviar(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -275,7 +264,6 @@ export function CheckinSentimento() {
       { emocao, motivo: motivo.trim() },
       {
         onSuccess: () => {
-          setEditando(false);
           toast.success("Sentimento registrado. Obrigado por compartilhar!");
         },
         onError: () => {
@@ -285,31 +273,42 @@ export function CheckinSentimento() {
     );
   }
 
-  const respondido = Boolean(checkin) && !editando;
+  const respondido = Boolean(checkin);
+  const temPesquisas = (pesquisas?.length ?? 0) > 0;
+  // Só mostra o sleep com a lista de pesquisas carregada, para não aparecer por engano durante o carregamento.
+  const semPendencias = respondido && pesquisasCarregadas && !temPesquisas;
 
   return (
-    <section aria-labelledby={TITULO_CHECKIN} className="mt-8 w-full">
+    <section aria-label="Check-in de sentimento e pesquisas pendentes" className="mt-8 w-full">
       <div className="rounded-2xl bg-accent-soft p-6">
-        <CabecalhoCheckin />
+        {respondido ? null : (
+          <>
+            <CabecalhoCheckin />
 
-        {isError ? (
-          <p className="mt-6 rounded-2xl border border-accent-orange/40 bg-accent-orange/10 p-4 text-sm font-medium text-foreground">
-            Não conseguimos ler o seu check-in de hoje. Você pode enviar o seu agora mesmo.
-          </p>
+            {isError ? (
+              <p className="mt-6 rounded-2xl border border-accent-orange/40 bg-accent-orange/10 p-4 text-sm font-medium text-foreground">
+                Não conseguimos ler o seu check-in de hoje. Você pode enviar o seu agora mesmo.
+              </p>
+            ) : null}
+
+            <FormularioCheckin
+              emocao={emocao}
+              motivo={motivo}
+              onEmocaoChange={setEmocao}
+              onMotivoChange={setMotivo}
+              onSubmit={enviar}
+              enviando={enviando}
+            />
+          </>
+        )}
+
+        {temPesquisas ? (
+          <div className={respondido ? undefined : "mt-10 border-t border-border pt-8"}>
+            <PesquisasPendentes pesquisas={pesquisas ?? []} />
+          </div>
         ) : null}
 
-        {respondido && checkin ? (
-          <RespostaRegistrada checkin={checkin} onEditar={iniciarEdicao} />
-        ) : (
-          <FormularioCheckin
-            emocao={emocao}
-            motivo={motivo}
-            onEmocaoChange={setEmocao}
-            onMotivoChange={setMotivo}
-            onSubmit={enviar}
-            enviando={enviando}
-          />
-        )}
+        {semPendencias ? <SemPendencias /> : null}
       </div>
     </section>
   );

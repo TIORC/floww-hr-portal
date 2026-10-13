@@ -37,6 +37,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useColaboradores } from "@/hooks/use-colaboradores";
 import {
   fetchFeedbackDetail,
   fetchFeedbackMetrics,
@@ -102,25 +104,29 @@ function FeedbackFormDialog({
   onSubmit: (draft: FeedbackDraft) => Promise<void>;
 }) {
   const [receiverId, setReceiverId] = useState("");
-  const [receiverName, setReceiverName] = useState("");
-  const [department, setDepartment] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const { data: colaboradores = [], isPending: carregandoColaboradores } = useColaboradores();
 
   useEffect(() => {
     if (open) {
       setReceiverId("");
-      setReceiverName("");
-      setDepartment("");
       setMessage("");
     }
   }, [open, mode]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const destinatario = colaboradores.find((colaborador) => colaborador.id === receiverId);
+    if (!destinatario) return;
     setSubmitting(true);
     try {
-      await onSubmit({ receiverId, receiverName, department, message });
+      await onSubmit({
+        receiverId,
+        receiverName: destinatario.nome,
+        department: destinatario.departamento,
+        message,
+      });
       onOpenChange(false);
     } finally {
       setSubmitting(false);
@@ -140,25 +146,19 @@ function FeedbackFormDialog({
           </DialogDescription>
         </DialogHeader>
         <form className="grid gap-4" onSubmit={handleSubmit}>
-          <Input
-            value={receiverName}
-            onChange={(event) => setReceiverName(event.target.value)}
-            placeholder="Nome do colaborador"
-            aria-label="Nome do colaborador"
-            required
-          />
-          <Input
-            value={receiverId}
-            onChange={(event) => setReceiverId(event.target.value)}
-            placeholder="ID do colaborador (opcional)"
-            aria-label="ID do colaborador"
-          />
-          <Input
-            value={department}
-            onChange={(event) => setDepartment(event.target.value)}
-            placeholder="Departamento"
-            aria-label="Departamento"
-          />
+          <Select value={receiverId} onValueChange={setReceiverId} disabled={carregandoColaboradores}>
+            <SelectTrigger aria-label={isRequest ? "Pessoa de quem solicitar feedback" : "Pessoa para enviar feedback"}>
+              <SelectValue placeholder={carregandoColaboradores ? "Carregando colaboradores..." : "Selecione um colaborador"} />
+            </SelectTrigger>
+            <SelectContent>
+              {colaboradores.map((colaborador) => (
+                <SelectItem key={colaborador.id} value={colaborador.id}>
+                  {colaborador.nome}
+                  {colaborador.departamento ? ` · ${colaborador.departamento}` : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Textarea
             value={message}
             onChange={(event) => setMessage(event.target.value)}
@@ -169,7 +169,7 @@ function FeedbackFormDialog({
             rows={4}
           />
           <DialogFooter>
-            <Button type="submit" disabled={submitting}>
+            <Button type="submit" disabled={submitting || !receiverId}>
               {submitting ? "Enviando..." : isRequest ? "Solicitar" : "Enviar feedback"}
             </Button>
           </DialogFooter>
@@ -434,9 +434,9 @@ function FeedbacksPage() {
             <Card>
               <CardHeader><CardTitle className="text-base">Resumo por item</CardTitle></CardHeader>
               <CardContent>
-                <div className="h-72 min-w-0">
+                <div className="h-[28rem] min-w-0">
                   <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart data={metrics?.radarData ?? []} outerRadius="72%">
+                    <RadarChart data={metrics?.radarData ?? []} outerRadius="80%">
                       <PolarGrid />
                       <PolarAngleAxis dataKey="category" tick={{ fontSize: 10 }} />
                       <PolarRadiusAxis domain={[0, 5]} tickCount={6} />
@@ -461,7 +461,7 @@ function FeedbacksPage() {
                       <Tooltip />
                       <Legend />
                       <Bar name="Feedbacks enviados" dataKey="sent" fill="#0284c7" radius={[3, 3, 0, 0]} />
-                      <Bar name="Feedbacks recebidos" dataKey="received" fill="#10b981" radius={[3, 3, 0, 0]} />
+                      <Bar name="Feedbacks recebidos" dataKey="received" fill="#f59e0b" radius={[3, 3, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -482,7 +482,7 @@ function FeedbacksPage() {
                 role="tab"
                 aria-selected={activeTab === id}
                 onClick={() => setActiveTab(id)}
-                className={`rounded-md px-3 py-2 text-sm ${activeTab === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+                className={`rounded-md px-3 py-2 text-sm ${activeTab === id ? "bg-accent-yellow font-semibold text-slate-900 shadow" : "text-muted-foreground hover:bg-muted"}`}
               >
                 {label} ({counts[id]})
               </button>

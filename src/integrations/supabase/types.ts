@@ -213,6 +213,53 @@ export type Database = {
           },
         ]
       }
+      colaboradores_formacoes: {
+        Row: {
+          area: string
+          colaborador_id: string
+          criado_em: string
+          data_inicio: string
+          data_termino: string
+          diploma_url: string
+          formacao: string
+          id: string
+          instituicao: string
+          tipo: string
+        }
+        Insert: {
+          area?: string
+          colaborador_id: string
+          criado_em?: string
+          data_inicio: string
+          data_termino: string
+          diploma_url?: string
+          formacao: string
+          id?: string
+          instituicao: string
+          tipo: string
+        }
+        Update: {
+          area?: string
+          colaborador_id?: string
+          criado_em?: string
+          data_inicio?: string
+          data_termino?: string
+          diploma_url?: string
+          formacao?: string
+          id?: string
+          instituicao?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "colaboradores_formacoes_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       colaboradores_importados: {
         Row: {
           atualizado_em: string
@@ -336,6 +383,194 @@ export type Database = {
           id?: string
           nome?: string
           ordem?: number
+        }
+        Relationships: []
+      }
+      feedback_respostas: {
+        Row: {
+          autor_id: string
+          criado_em: string
+          feedback_id: string
+          id: string
+          mensagem: string
+        }
+        Insert: {
+          autor_id: string
+          criado_em?: string
+          feedback_id: string
+          id?: string
+          mensagem: string
+        }
+        Update: {
+          autor_id?: string
+          criado_em?: string
+          feedback_id?: string
+          id?: string
+          mensagem?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_respostas_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores_importados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_respostas_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedbacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedbacks: {
+        Row: {
+          avaliacoes: Json
+          criado_em: string
+          destinatario_id: string
+          id: string
+          mensagem: string
+          remetente_id: string
+          status: string | null
+          tipo: string
+        }
+        Insert: {
+          avaliacoes?: Json
+          criado_em?: string
+          destinatario_id: string
+          id?: string
+          mensagem: string
+          remetente_id: string
+          status?: string | null
+          tipo: string
+        }
+        Update: {
+          avaliacoes?: Json
+          criado_em?: string
+          destinatario_id?: string
+          id?: string
+          mensagem?: string
+          remetente_id?: string
+          status?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedbacks_destinatario_id_fkey"
+            columns: ["destinatario_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores_importados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_remetente_id_fkey"
+            columns: ["remetente_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores_importados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      floww_coins_saldos: {
+        Row: {
+          atualizado_em: string
+          colaborador_importado_id: string
+          saldo: number
+        }
+        Insert: {
+          atualizado_em?: string
+          colaborador_importado_id: string
+          saldo?: number
+        }
+        Update: {
+          atualizado_em?: string
+          colaborador_importado_id?: string
+          saldo?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "floww_coins_saldos_colaborador_importado_id_fkey"
+            columns: ["colaborador_importado_id"]
+            isOneToOne: true
+            referencedRelation: "colaboradores_importados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      floww_coins_transacoes: {
+        Row: {
+          colaborador_importado_id: string
+          criado_em: string
+          descricao: string
+          id: string
+          produto_id: string | null
+          tipo: string
+          valor: number
+        }
+        Insert: {
+          colaborador_importado_id: string
+          criado_em?: string
+          descricao: string
+          id?: string
+          produto_id?: string | null
+          tipo: string
+          valor: number
+        }
+        Update: {
+          colaborador_importado_id?: string
+          criado_em?: string
+          descricao?: string
+          id?: string
+          produto_id?: string | null
+          tipo?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "floww_coins_transacoes_colaborador_importado_id_fkey"
+            columns: ["colaborador_importado_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores_importados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "floww_coins_transacoes_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos_shop"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notificacoes: {
+        Row: {
+          chave: string
+          criado_em: string
+          id: string
+          lida: boolean
+          mensagem: string
+          titulo: string
+          user_id: string
+        }
+        Insert: {
+          chave: string
+          criado_em?: string
+          id?: string
+          lida?: boolean
+          mensagem: string
+          titulo: string
+          user_id: string
+        }
+        Update: {
+          chave?: string
+          criado_em?: string
+          id?: string
+          lida?: boolean
+          mensagem?: string
+          titulo?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -511,6 +746,78 @@ export type Database = {
             columns: ["colaborador_id"]
             isOneToOne: false
             referencedRelation: "perfil_colaborador"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      produtos_shop: {
+        Row: {
+          categoria: string
+          criado_em: string
+          descricao: string
+          esgotado: boolean
+          id: string
+          imagem_url: string | null
+          nome: string
+          preco: number
+          quantidade_estoque: number
+        }
+        Insert: {
+          categoria: string
+          criado_em?: string
+          descricao?: string
+          esgotado?: boolean
+          id: string
+          imagem_url?: string | null
+          nome: string
+          preco: number
+          quantidade_estoque?: number
+        }
+        Update: {
+          categoria?: string
+          criado_em?: string
+          descricao?: string
+          esgotado?: boolean
+          id?: string
+          imagem_url?: string | null
+          nome?: string
+          preco?: number
+          quantidade_estoque?: number
+        }
+        Relationships: []
+      }
+      respostas_pesquisas_satisfacao: {
+        Row: {
+          colaborador_id: string
+          id: string
+          pesquisa_id: string
+          respondido_em: string
+        }
+        Insert: {
+          colaborador_id: string
+          id?: string
+          pesquisa_id: string
+          respondido_em?: string
+        }
+        Update: {
+          colaborador_id?: string
+          id?: string
+          pesquisa_id?: string
+          respondido_em?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "respostas_pesquisas_satisfacao_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "respostas_pesquisas_satisfacao_pesquisa_id_fkey"
+            columns: ["pesquisa_id"]
+            isOneToOne: false
+            referencedRelation: "pesquisas_satisfacao"
             referencedColumns: ["id"]
           },
         ]
@@ -818,6 +1125,7 @@ export type Database = {
         Args: { p_colaborador_id: string }
         Returns: boolean
       }
+      colaborador_importado_do_usuario: { Args: never; Returns: string }
       get_acessos_diario_comparativo: {
         Args: { p_user_id: string }
         Returns: Json
@@ -834,13 +1142,87 @@ export type Database = {
           user_id: string
         }[]
       }
+      listar_habilidades_formacoes_diretorio: {
+        Args: never
+        Returns: {
+          colaborador_importado_id: string
+          formacoes: Json
+          habilidades: string
+        }[]
+      }
+      listar_minhas_transacoes_floww_coins: {
+        Args: never
+        Returns: Database["public"]["Tables"]["floww_coins_transacoes"]["Row"][]
+      }
+      listar_pesquisas_pendentes_colaborador: { Args: never; Returns: Json }
+      listar_feedbacks: {
+        Args: { p_tipo: string; p_inicio: string; p_fim: string; p_busca?: string }
+        Returns: Json
+      }
+      obter_feedback: { Args: { p_id: string }; Returns: Json }
+      obter_metricas_feedbacks: { Args: { p_inicio: string; p_fim: string }; Returns: Json }
+      enviar_feedback: { Args: { p_destinatario_id: string; p_mensagem: string }; Returns: string }
+      solicitar_feedback: { Args: { p_destinatario_id: string; p_mensagem: string }; Returns: string }
+      responder_feedback: { Args: { p_id: string; p_mensagem: string }; Returns: undefined }
+      meu_colaborador_importado_id: { Args: never; Returns: string }
+      obter_humor_medio_empresa: {
+        Args: { p_inicio?: string; p_fim?: string }
+        Returns: Json
+      }
+      listar_ranking_floww_coins: {
+        Args: never
+        Returns: {
+          cargo: string
+          departamento: string
+          id: string
+          nome: string
+          papel: string
+          saldo: number
+        }[]
+      }
+      garantir_notificacao_boas_vindas: { Args: never; Returns: undefined }
+      registrar_entrada_diaria_floww_coins: { Args: never; Returns: Json }
       obter_checkin_sentimento_do_dia: { Args: never; Returns: Json }
+      obter_meu_perfil: { Args: never; Returns: Json }
+      obter_meu_saldo_floww_coins: { Args: never; Returns: Json }
+      remover_formacao: { Args: { p_id: string }; Returns: undefined }
+      salvar_formacao: {
+        Args: {
+          p_area: string
+          p_data_inicio: string
+          p_data_termino: string
+          p_diploma_url: string
+          p_formacao: string
+          p_id?: string
+          p_instituicao: string
+          p_tipo: string
+        }
+        Returns: string
+      }
+      obter_preferencias_email: { Args: never; Returns: Json }
+      salvar_preferencias_email: { Args: { p_preferencias: Json }; Returns: undefined }
+      salvar_minhas_informacoes: {
+        Args: { p_biografia: string; p_habilidades: string }
+        Returns: undefined
+      }
+      salvar_meu_perfil: {
+        Args: { p_cargo_visivel: string; p_idioma: string; p_contatos: Json }
+        Returns: undefined
+      }
       registrar_acesso_diario: {
         Args: { p_colaborador_id: string }
         Returns: undefined
       }
       registrar_checkin_sentimento: {
         Args: { p_colaborador_id: string; p_emocao: string; p_motivo?: string }
+        Returns: undefined
+      }
+      resgatar_produtos_floww_coins: {
+        Args: { p_itens: Json }
+        Returns: Json
+      }
+      responder_pesquisa_satisfacao: {
+        Args: { p_pesquisa_id: string }
         Returns: undefined
       }
     }
